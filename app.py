@@ -1598,37 +1598,47 @@ df['quarter'] = df['date'].dt.quarter
                 st.markdown("**⚡ Preset Scenarios** — click one to auto-fill the fields below")
                 pre_col1, pre_col2, pre_col3, pre_col4 = st.columns(4)
                 
-                # --- preset buttons write directly to session_state then rerun ---
                 available_countries = sorted(df['country'].unique().tolist())
                 
-                def _apply_preset(country, year, month):
-                    if country in available_countries:
-                        st.session_state["quick_country"] = country
-                    st.session_state["quick_year"]    = year
-                    st.session_state["quick_month"]   = month
-                
+                # Preset buttons store a request in a neutral key — no widget keys touched here
                 with pre_col1:
                     if st.button("🌿 Kenya 2026", key="preset_kenya", use_container_width=True,
                                  help="High-volatility East African market"):
-                        _apply_preset("Kenya", 2026, 6)
+                        st.session_state["_quick_preset"] = {"country": "Kenya", "year": 2026, "month": 6}
                         st.rerun()
                 with pre_col2:
-                    if st.button("🇧🇷 Brazil 2026", key="preset_brazil", use_container_width=True,
+                    if st.button("🌎 Brazil 2026", key="preset_brazil", use_container_width=True,
                                  help="Large emerging-market economy"):
-                        _apply_preset("Brazil", 2026, 6)
+                        st.session_state["_quick_preset"] = {"country": "Brazil", "year": 2026, "month": 6}
                         st.rerun()
                 with pre_col3:
-                    if st.button("🇮🇳 India 2026", key="preset_india", use_container_width=True,
+                    if st.button("🌏 India 2026", key="preset_india", use_container_width=True,
                                  help="Populous country with seasonal agriculture"):
-                        _apply_preset("India", 2026, 6)
+                        st.session_state["_quick_preset"] = {"country": "India", "year": 2026, "month": 6}
                         st.rerun()
                 with pre_col4:
                     if st.button("🌍 Nigeria 2026", key="preset_nigeria", use_container_width=True,
                                  help="Largest African economy"):
-                        _apply_preset("Nigeria", 2026, 6)
+                        st.session_state["_quick_preset"] = {"country": "Nigeria", "year": 2026, "month": 6}
                         st.rerun()
                 
                 st.markdown("---")
+                
+                # Apply preset BEFORE widgets render — pop so it fires only once
+                _preset = st.session_state.pop("_quick_preset", None)
+                if _preset:
+                    if _preset["country"] in available_countries:
+                        st.session_state["quick_country"] = _preset["country"]
+                    st.session_state["quick_year"]  = _preset["year"]
+                    st.session_state["quick_month"] = _preset["month"]
+                
+                # Initialise defaults on first visit
+                if "quick_country" not in st.session_state:
+                    st.session_state["quick_country"] = available_countries[0]
+                if "quick_year" not in st.session_state:
+                    st.session_state["quick_year"] = 2026
+                if "quick_month" not in st.session_state:
+                    st.session_state["quick_month"] = 1
                 
                 quick_col1, quick_col2, quick_col3 = st.columns(3)
                 
@@ -1636,14 +1646,16 @@ df['quarter'] = df['date'].dt.quarter
                     quick_country = st.selectbox(
                         "🌍 Select Country",
                         available_countries,
+                        index=available_countries.index(st.session_state["quick_country"]),
                         key="quick_country"
                     )
                 
                 with quick_col2:
+                    _year_opts = [2024, 2025, 2026, 2027, 2028]
                     quick_year = st.selectbox(
                         "📅 Target Year",
-                        options=[2024, 2025, 2026, 2027, 2028],
-                        index=2,
+                        options=_year_opts,
+                        index=_year_opts.index(st.session_state["quick_year"]) if st.session_state["quick_year"] in _year_opts else 2,
                         key="quick_year"
                     )
                 
@@ -1651,6 +1663,7 @@ df['quarter'] = df['date'].dt.quarter
                     quick_month = st.selectbox(
                         "📆 Target Month",
                         options=list(range(1, 13)),
+                        index=int(st.session_state["quick_month"]) - 1,
                         format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
                                               'July', 'August', 'September', 'October', 'November', 'December'][x-1],
                         key="quick_month"
