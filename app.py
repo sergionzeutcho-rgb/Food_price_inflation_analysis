@@ -25,21 +25,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# ─── Global colour constants ────────────────────────────────────────────────
+COLOR_LOW   = "#27ae60"   # green  – low / safe
+COLOR_MED   = "#f39c12"   # amber  – moderate / caution
+COLOR_HIGH  = "#e74c3c"   # red    – high / alert
+COLOR_BLUE  = "#1f77b4"   # brand blue
+
+RISK_LOW_THRESHOLD  = 5    # inflation %
+RISK_HIGH_THRESHOLD = 10   # inflation %
+
+# ─── Custom CSS ──────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+    /* ── typography ── */
     .main-header {
         font-size: 2.5rem;
         font-weight: bold;
         color: #1f77b4;
         text-align: center;
-        margin-bottom: 1rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        border-radius: 10px;
-        padding: 1rem;
-        text-align: center;
+        margin-bottom: 0.25rem;
     }
     .section-header {
         font-size: 1.5rem;
@@ -49,6 +53,7 @@ st.markdown("""
         padding-bottom: 0.5rem;
         margin-top: 2rem;
     }
+    /* ── coloured callout boxes ── */
     .explanation-box {
         background-color: #e8f4f8;
         border-left: 4px solid #3498db;
@@ -70,14 +75,37 @@ st.markdown("""
         margin: 1rem 0;
         border-radius: 0 5px 5px 0;
     }
-    /* Navigation button styling */
+    /* TL;DR / key-takeaway strip */
+    .takeaway-box {
+        background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        border: 1px solid #667eea55;
+        border-left: 5px solid #667eea;
+        padding: 0.85rem 1.1rem;
+        margin: 0.5rem 0 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.97rem;
+    }
+    /* Risk colour badges */
+    .badge-low  { background:#27ae60; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
+    .badge-med  { background:#f39c12; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
+    .badge-high { background:#e74c3c; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
+    /* metric card */
+    .metric-card {
+        background-color: #f0f2f6;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+    }
+    /* ── navigation buttons: compact, 2-row on narrow screens ── */
     div[data-testid="column"] button {
-        font-size: 0.75rem !important;
-        padding: 0.3rem 0.2rem !important;
-        white-space: nowrap;
+        font-size: 0.72rem !important;
+        padding: 0.28rem 0.15rem !important;
+        white-space: normal;
+        line-height: 1.2;
     }
     div[data-testid="column"] button p {
-        font-size: 0.75rem !important;
+        font-size: 0.72rem !important;
+        white-space: normal;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -459,6 +487,53 @@ def create_interactive_country_lines(df):
     return fig
 
 
+def create_gauge_chart(prediction: float, title: str = "Predicted Inflation") -> go.Figure:
+    """Create a gauge chart showing predicted inflation and risk level."""
+    # Colour steps: green → amber → red
+    if prediction <= RISK_LOW_THRESHOLD:
+        bar_color = COLOR_LOW
+    elif prediction <= RISK_HIGH_THRESHOLD:
+        bar_color = COLOR_MED
+    else:
+        bar_color = COLOR_HIGH
+
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number+delta",
+        value=prediction,
+        number={"suffix": "%", "font": {"size": 28}},
+        title={"text": title, "font": {"size": 16}},
+        gauge={
+            "axis": {"range": [-10, 30], "ticksuffix": "%"},
+            "bar": {"color": bar_color, "thickness": 0.35},
+            "bgcolor": "white",
+            "borderwidth": 1,
+            "bordercolor": "#ccc",
+            "steps": [
+                {"range": [-10, RISK_LOW_THRESHOLD],  "color": "#d5f5e3"},
+                {"range": [RISK_LOW_THRESHOLD, RISK_HIGH_THRESHOLD], "color": "#fef9e7"},
+                {"range": [RISK_HIGH_THRESHOLD, 30],  "color": "#fce4e4"},
+            ],
+            "threshold": {
+                "line": {"color": "black", "width": 3},
+                "thickness": 0.75,
+                "value": prediction,
+            },
+        },
+    ))
+    fig.update_layout(height=280, margin=dict(t=60, b=10, l=30, r=30))
+    return fig
+
+
+def get_risk_label(prediction: float) -> tuple[str, str]:
+    """Return (emoji+label, css-class) for a given inflation prediction."""
+    if prediction > RISK_HIGH_THRESHOLD:
+        return "🔴 High Risk", "badge-high"
+    elif prediction > RISK_LOW_THRESHOLD:
+        return "🟡 Medium Risk", "badge-med"
+    else:
+        return "🟢 Low Risk", "badge-low"
+
+
 def main():
     """Main application."""
     
@@ -518,18 +593,45 @@ def main():
     
     # Filters
     st.sidebar.markdown("---")
-    st.sidebar.subheader("Filters")
+    st.sidebar.subheader("🔎 Filters")
     
     countries = ["All Countries"] + sorted(df['country'].unique().tolist())
-    selected_country = st.sidebar.selectbox("Select Country", countries)
+    selected_country = st.sidebar.selectbox(
+        "Select Country",
+        countries,
+        help="Filter all charts to show data for one country only"
+    )
     
     years = sorted(df['year'].unique())
     year_range = st.sidebar.slider(
         "Year Range",
         min_value=int(min(years)),
         max_value=int(max(years)),
-        value=(int(min(years)), int(max(years)))
+        value=(int(min(years)), int(max(years))),
+        help="Drag the handles to narrow the time window"
     )
+    
+    # Reset filters button
+    default_country = "All Countries"
+    default_years   = (int(min(years)), int(max(years)))
+    filters_active  = (selected_country != default_country) or (year_range != default_years)
+    
+    if filters_active:
+        st.sidebar.markdown("**Active filters:**")
+        if selected_country != default_country:
+            st.sidebar.info(f"🌍 {selected_country}")
+        if year_range != default_years:
+            st.sidebar.info(f"📅 {year_range[0]} – {year_range[1]}")
+    
+    if st.sidebar.button("🔄 Reset Filters", use_container_width=True, disabled=not filters_active):
+        st.session_state["_reset_country"] = True
+        st.rerun()
+    
+    # Handle reset (re-run with defaults)
+    if st.session_state.get("_reset_country"):
+        st.session_state.pop("_reset_country", None)
+        selected_country = default_country
+        year_range       = default_years
     
     # Filter data
     df_filtered = df[(df['year'] >= year_range[0]) & (df['year'] <= year_range[1])]
@@ -540,18 +642,45 @@ def main():
     if page == "Overview":
         st.markdown('<p class="section-header">Project Overview</p>', unsafe_allow_html=True)
         
+        # TL;DR key takeaway
+        avg_inf_all = df['inflation'].mean()
+        st.markdown(f"""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — Over 16 years (2007–2023) food prices rose significantly across 
+        25 countries. Average global inflation stood at <strong>{avg_inf_all:.1f}%</strong> per year, 
+        with large regional differences. Scroll down or use a page in the navigation bar to dive deeper.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # How to Use expander
+        with st.expander("📖 How to Use This Dashboard", expanded=False):
+            st.markdown("""
+            **Getting Started**
+            
+            | Step | What to do |
+            |------|-----------|
+            | 1️⃣ | Use the **top navigation buttons** (or the sidebar) to switch between pages |
+            | 2️⃣ | Use the **sidebar filters** to narrow data by country or year range |
+            | 3️⃣ | Hover any chart to see exact values; click legend items to show/hide series |
+            | 4️⃣ | Visit **🔮 Prediction Tool** to forecast future inflation for any country |
+            | 5️⃣ | Visit **🌍 Country Explorer** to download filtered data as CSV |
+            
+            **Page Guide**
+            - **🏠 Overview** — big-picture summary and key metrics  
+            - **🧹 Data Cleaning** — how the raw dataset was prepared  
+            - **📊 Data Analysis** — distributions, correlations and seasonal patterns  
+            - **🔬 Hypothesis Testing** — statistically validated findings  
+            - **🤖 ML Predictions** — model training, comparison and feature importance  
+            - **🔮 Prediction Tool** — interactive inflation forecaster  
+            - **🌍 Country Explorer** — per-country deep-dive and data download  
+            - **ℹ️ About** — team, methodology and data source  
+            """)
+        
         st.markdown("""
         This dashboard presents a comprehensive analysis of global food price inflation trends using the 
-        World Real-Time Food Prices (RTFP) dataset from the World Bank. Our team of three data analysts 
-        has examined how food prices have evolved across 25 countries from January 2007 to October 2023, 
-        uncovering significant patterns that have important implications for policymakers, businesses, 
-        and consumers worldwide.
-        
-        The analysis follows a rigorous data science workflow, beginning with data cleaning and 
-        preprocessing, moving through exploratory data analysis and statistical hypothesis testing, 
-        and culminating in machine learning models capable of predicting future inflation trends. 
-        Each stage of this process is documented in dedicated Jupyter notebooks, and the key findings 
-        are summarised throughout this interactive dashboard.
+        World Real-Time Food Prices (RTFP) dataset from the World Bank. Our team has examined how food 
+        prices have evolved across 25 countries from January 2007 to October 2023, uncovering patterns 
+        that have important implications for policymakers, businesses, and consumers worldwide.
         """)
         
         # Key metrics
@@ -560,20 +689,37 @@ def main():
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("Countries Analysed", df_filtered['country'].nunique())
+            st.metric(
+                "Countries Analysed",
+                df_filtered['country'].nunique(),
+                help="Number of distinct countries in the currently filtered dataset"
+            )
         
         with col2:
-            st.metric("Data Points", f"{len(df_filtered):,}")
+            st.metric(
+                "Data Points",
+                f"{len(df_filtered):,}",
+                help="Total monthly observations matching your current filters"
+            )
         
         with col3:
             avg_inflation = df_filtered['inflation'].mean()
-            st.metric("Avg Inflation", f"{avg_inflation:.2f}%")
+            color_note = "🟢" if avg_inflation < RISK_LOW_THRESHOLD else ("🟡" if avg_inflation < RISK_HIGH_THRESHOLD else "🔴")
+            st.metric(
+                "Avg Inflation",
+                f"{avg_inflation:.2f}%",
+                help=f"{color_note} Average year-over-year food price inflation. Below 5% = low, 5–10% = moderate, above 10% = high"
+            )
         
         with col4:
             if len(df_filtered) > 1:
                 price_change = ((df_filtered['close'].iloc[-1] - df_filtered['close'].iloc[0]) / 
                                df_filtered['close'].iloc[0] * 100)
-                st.metric("Total Price Change", f"{price_change:.1f}%")
+                st.metric(
+                    "Total Price Change",
+                    f"{price_change:.1f}%",
+                    help="Cumulative percentage change in the food price index from first to last data point in the filtered range"
+                )
             else:
                 st.metric("Total Price Change", "N/A")
         
@@ -649,6 +795,15 @@ def main():
     # ============= PAGE: DATA CLEANING =============
     elif page == "Data Cleaning":
         st.markdown('<p class="section-header">Data Cleaning Process</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
+        validated and enriched with 6 new features (volatility, price change, month, year…).
+        Missing inflation values (≈7.6%) were kept intentionally — they are structural gaps from the
+        year-over-year calculation, not errors.
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("""
         Data cleaning is the foundational step of any data analytics project, and its importance cannot 
@@ -773,6 +928,14 @@ df['quarter'] = df['date'].dt.quarter
         st.markdown('<p class="section-header">Exploratory Data Analysis</p>', unsafe_allow_html=True)
         
         st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — Food prices are right-skewed and have risen steadily since 2007.
+        Country-level inflation ranges from near 0% to over 20%. Price volatility and inflation are
+        positively correlated, and mild seasonal patterns exist — use the sidebar to filter by country.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
         Exploratory Data Analysis (EDA) is the detective work of data science. Before we can draw 
         conclusions or build predictive models, we need to deeply understand our data—its distributions, 
         patterns, relationships, and anomalies. This systematic exploration guides our subsequent 
@@ -834,6 +997,16 @@ df['quarter'] = df['date'].dt.quarter
         fig = create_country_comparison(df_filtered, 'inflation')
         st.plotly_chart(fig, use_container_width=True)
         
+        st.markdown("""
+        <div class="recommendation-box">
+        🧠 <strong>What does this mean for you?</strong><br>
+        Countries at the <em>top of the chart</em> (highest inflation) face the greatest food-affordability
+        pressures. Policymakers in those nations should prioritise import diversification, strategic
+        reserves, and targeted consumer subsidies. Businesses operating across borders should weight
+        supply-chain risk by country inflation level.
+        </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown('<p class="section-header">Correlation Analysis</p>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -864,6 +1037,17 @@ df['quarter'] = df['date'].dt.quarter
         fig_corr = create_correlation_heatmap(df_filtered)
         st.plotly_chart(fig_corr, use_container_width=True)
         
+        st.markdown("""
+        <div class="recommendation-box">
+        🧠 <strong>What does this mean for you?</strong><br>
+        The strong link between price <em>volatility</em> (High−Low range) and <em>inflation</em> is the
+        key practical finding here. It means that when prices swing wildly within a single month,
+        overall price levels tend to be rising too. Smoothing-out those swings — through better
+        market information, storage infrastructure, or price floors/ceilings — could also help
+        moderate inflation.
+        </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown('<p class="section-header">Seasonal Patterns</p>', unsafe_allow_html=True)
         
         st.markdown("""
@@ -880,6 +1064,15 @@ df['quarter'] = df['date'].dt.quarter
         # Seasonal chart
         fig = create_seasonal_chart(df_filtered)
         st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("""
+        <div class="recommendation-box">
+        🧠 <strong>What does this mean for you?</strong><br>
+        If you see a clear seasonal spike in certain months for your selected country, that is a
+        signal to <em>stock up before</em> those months or to look for suppliers in the southern
+        hemisphere who are in their harvest season when you are in a price-spike period.
+        </div>
+        """, unsafe_allow_html=True)
         
         # Interactive country comparison
         st.markdown('<p class="section-header">Interactive Country Comparison</p>', unsafe_allow_html=True)
@@ -918,6 +1111,15 @@ df['quarter'] = df['date'].dt.quarter
     # ============= PAGE: HYPOTHESIS TESTING =============
     elif page == "Hypothesis Testing":
         st.markdown('<p class="section-header">Statistical Hypothesis Testing</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — All four hypotheses were <strong>confirmed statistically</strong>:
+        (H1) inflation differs significantly by country; (H2) price volatility drives higher inflation;
+        (H3) seasonal monthly patterns exist; (H4) food prices have significantly increased long-term.
+        Significance level: α = 0.05.
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("""
         While exploratory analysis reveals patterns in the data, hypothesis testing provides a 
@@ -1167,6 +1369,15 @@ df['quarter'] = df['date'].dt.quarter
         st.markdown('<p class="section-header">Machine Learning Predictions</p>', unsafe_allow_html=True)
         
         st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — Three models were trained: Linear Regression, Random Forest, and
+        XGBoost. The best model explains the majority of inflation variance (R² on test data). The
+        strongest predictor is <em>last month’s inflation</em>. Head to
+        <strong>🔮 Prediction Tool</strong> to run live forecasts.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
         While statistical analysis tells us what has happened and helps us understand why certain 
         patterns exist, machine learning takes us a step further by predicting what will happen next. 
         By training models on historical data, we can forecast future inflation trends, enabling 
@@ -1374,12 +1585,50 @@ df['quarter'] = df['date'].dt.quarter
                 </div>
                 """, unsafe_allow_html=True)
                 
+                # ----- Preset Scenarios -----
+                st.markdown("**⚡ Preset Scenarios** — click one to auto-fill the fields below")
+                pre_col1, pre_col2, pre_col3, pre_col4 = st.columns(4)
+                
+                preset_choice = None
+                with pre_col1:
+                    if st.button("🌿 Kenya 2026", key="preset_kenya", use_container_width=True,
+                                 help="High-volatility East African market"):
+                        preset_choice = {"country": "Kenya", "year": 2026, "month": 6}
+                with pre_col2:
+                    if st.button("🇧🇷 Brazil 2026", key="preset_brazil", use_container_width=True,
+                                 help="Large emerging-market economy"):
+                        preset_choice = {"country": "Brazil", "year": 2026, "month": 6}
+                with pre_col3:
+                    if st.button("🇮🇳 India 2026", key="preset_india", use_container_width=True,
+                                 help="Populous country with seasonal agriculture"):
+                        preset_choice = {"country": "India", "year": 2026, "month": 6}
+                with pre_col4:
+                    if st.button("🌍 Nigeria 2026", key="preset_nigeria", use_container_width=True,
+                                 help="Largest African economy"):
+                        preset_choice = {"country": "Nigeria", "year": 2026, "month": 6}
+                
+                st.markdown("---")
+                
+                # Determine defaults (from preset or widget)
+                available_countries = sorted(df['country'].unique().tolist())
+                default_country_idx = 0
+                default_year_idx    = 2
+                default_month_idx   = 0
+                
+                if preset_choice:
+                    c = preset_choice["country"]
+                    if c in available_countries:
+                        default_country_idx = available_countries.index(c)
+                    default_year_idx  = [2024,2025,2026,2027,2028].index(preset_choice["year"])
+                    default_month_idx = preset_choice["month"] - 1
+                
                 quick_col1, quick_col2, quick_col3 = st.columns(3)
                 
                 with quick_col1:
                     quick_country = st.selectbox(
                         "🌍 Select Country",
-                        sorted(df['country'].unique().tolist()),
+                        available_countries,
+                        index=default_country_idx,
                         key="quick_country"
                     )
                 
@@ -1387,7 +1636,7 @@ df['quarter'] = df['date'].dt.quarter
                     quick_year = st.selectbox(
                         "📅 Target Year",
                         options=[2024, 2025, 2026, 2027, 2028],
-                        index=2,
+                        index=default_year_idx,
                         key="quick_year"
                     )
                 
@@ -1395,6 +1644,7 @@ df['quarter'] = df['date'].dt.quarter
                     quick_month = st.selectbox(
                         "📆 Target Month",
                         options=list(range(1, 13)),
+                        index=default_month_idx,
                         format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
                                               'July', 'August', 'September', 'October', 'November', 'December'][x-1],
                         key="quick_month"
@@ -1476,63 +1726,73 @@ df['quarter'] = df['date'].dt.quarter
                                 st.markdown("---")
                                 st.markdown('<p class="section-header">📊 Prediction Results</p>', unsafe_allow_html=True)
                                 
-                                # Create visual result cards
-                                result_col1, result_col2, result_col3 = st.columns(3)
+                                last_inf = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
+                                delta_val = prediction - last_inf
+                                hist_avg  = float(country_data['inflation'].mean())
                                 
-                                with result_col1:
-                                    delta_val = prediction - (float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation)
-                                    st.metric(
-                                        "Predicted Inflation",
-                                        f"{prediction:.2f}%",
-                                        delta=f"{delta_val:+.2f}%",
-                                        delta_color="inverse"
+                                if prediction > last_inf:
+                                    trend = "📈 Rising"
+                                elif prediction < last_inf:
+                                    trend = "📉 Falling"
+                                else:
+                                    trend = "➡️ Stable"
+                                
+                                # Gauge + key metrics side by side
+                                gauge_col, metrics_col = st.columns([1, 2])
+                                
+                                with gauge_col:
+                                    st.plotly_chart(
+                                        create_gauge_chart(prediction, "Inflation Forecast"),
+                                        use_container_width=True
                                     )
                                 
-                                with result_col2:
-                                    if prediction > float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation:
-                                        trend = "📈 Rising"
-                                    elif prediction < float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation:
-                                        trend = "📉 Falling"
-                                    else:
-                                        trend = "➡️ Stable"
-                                    st.metric("Trend", trend)
+                                with metrics_col:
+                                    risk_label, risk_class = get_risk_label(prediction)
+                                    m1, m2 = st.columns(2)
+                                    with m1:
+                                        st.metric(
+                                            "Predicted Inflation",
+                                            f"{prediction:.2f}%",
+                                            delta=f"{delta_val:+.2f}%",
+                                            delta_color="inverse",
+                                            help="Change vs last known inflation value"
+                                        )
+                                        st.metric(
+                                            "Trend",
+                                            trend,
+                                            help="Direction relative to last recorded month"
+                                        )
+                                    with m2:
+                                        st.metric(
+                                            "vs Country Avg",
+                                            f"{prediction - hist_avg:+.2f}%",
+                                            help=f"Country historical avg: {hist_avg:.2f}%"
+                                        )
+                                        st.markdown(
+                                            f'<span class="{risk_class}" style="font-size:1.1rem;padding:6px 14px;">'
+                                            f'{risk_label}</span>',
+                                            unsafe_allow_html=True
+                                        )
                                 
-                                with result_col3:
-                                    if prediction > 10:
-                                        risk = "🔴 High"
-                                        risk_color = "red"
-                                    elif prediction > 5:
-                                        risk = "🟡 Medium"
-                                        risk_color = "orange"
-                                    else:
-                                        risk = "🟢 Low"
-                                        risk_color = "green"
-                                    st.metric("Risk Level", risk)
-                                
-                                # Interpretation
+                                # Interpretation box
                                 month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
                                              'July', 'August', 'September', 'October', 'November', 'December'][quick_month-1]
                                 
-                                if prediction > 10:
+                                if prediction > RISK_HIGH_THRESHOLD:
                                     interpretation = f"🚨 **HIGH INFLATION ALERT**: The model predicts significant inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This could severely impact food affordability and requires immediate attention from policymakers."
-                                elif prediction > 5:
+                                elif prediction > RISK_LOW_THRESHOLD:
                                     interpretation = f"⚠️ **MODERATE INFLATION**: The model predicts inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This warrants monitoring and may require budget adjustments."
                                 elif prediction > 0:
                                     interpretation = f"✅ **LOW INFLATION**: The model predicts mild inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This is within normal economic expectations."
                                 else:
                                     interpretation = f"📉 **DEFLATION**: The model predicts negative inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. Food prices are expected to decrease."
                                 
-                                st.markdown(f"""
-                                <div class="outcome-box">
-                                {interpretation}
-                                </div>
-                                """, unsafe_allow_html=True)
+                                st.markdown(f'<div class="outcome-box">{interpretation}</div>', unsafe_allow_html=True)
                                 
-                                # Show comparison chart
+                                # Historical comparison chart (last 24 months + avg line + prediction star)
                                 st.markdown('<p class="section-header">Historical Comparison</p>', unsafe_allow_html=True)
                                 
-                                # Create comparison chart
-                                recent_inflation = country_data.tail(12)[['date', 'inflation']].dropna()
+                                recent_inflation = country_data.tail(24)[['date', 'inflation']].dropna()
                                 if len(recent_inflation) > 0:
                                     fig = go.Figure()
                                     
@@ -1541,25 +1801,38 @@ df['quarter'] = df['date'].dt.quarter
                                         y=recent_inflation['inflation'],
                                         mode='lines+markers',
                                         name='Historical',
-                                        line=dict(color='steelblue', width=2)
+                                        line=dict(color=COLOR_BLUE, width=2),
+                                        marker=dict(size=5)
                                     ))
                                     
-                                    # Add prediction point
+                                    # Historical average reference line
+                                    fig.add_hline(
+                                        y=hist_avg,
+                                        line_dash="dash",
+                                        line_color=COLOR_MED,
+                                        annotation_text=f"Avg: {hist_avg:.1f}%",
+                                        annotation_position="top left"
+                                    )
+                                    
+                                    # Prediction star marker
                                     pred_date = pd.Timestamp(year=quick_year, month=quick_month, day=1)
                                     fig.add_trace(go.Scatter(
                                         x=[pred_date],
                                         y=[prediction],
-                                        mode='markers',
+                                        mode='markers+text',
                                         name='Prediction',
-                                        marker=dict(color='coral', size=15, symbol='star')
+                                        text=[f"{prediction:.1f}%"],
+                                        textposition="top center",
+                                        marker=dict(color=COLOR_HIGH, size=16, symbol='star')
                                     ))
                                     
                                     fig.update_layout(
-                                        title=f"Inflation Trend for {quick_country}",
+                                        title=f"Inflation Trend – {quick_country} (last 24 months + forecast)",
                                         xaxis_title="Date",
                                         yaxis_title="Inflation (%)",
-                                        height=400,
-                                        showlegend=True
+                                        height=420,
+                                        showlegend=True,
+                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                                     )
                                     
                                     st.plotly_chart(fig, use_container_width=True)
@@ -1762,50 +2035,67 @@ df['quarter'] = df['date'].dt.quarter
                             st.markdown("---")
                             st.markdown('<p class="section-header">📊 Custom Prediction Results</p>', unsafe_allow_html=True)
                             
-                            result_col1, result_col2, result_col3 = st.columns(3)
+                            risk_label, risk_class = get_risk_label(prediction)
+                            delta_vs_prev = prediction - custom_lag1
+                            trend = "📈 Rising" if prediction > custom_lag1 else "📉 Falling" if prediction < custom_lag1 else "➡️ Stable"
                             
-                            with result_col1:
-                                st.metric(
-                                    "Predicted Inflation",
-                                    f"{prediction:.2f}%",
-                                    delta=f"{prediction - custom_lag1:+.2f}% vs last month"
+                            # Gauge + metrics side by side
+                            c_gauge_col, c_metrics_col = st.columns([1, 2])
+                            
+                            with c_gauge_col:
+                                st.plotly_chart(
+                                    create_gauge_chart(prediction, "Inflation Forecast"),
+                                    use_container_width=True
                                 )
                             
-                            with result_col2:
-                                trend = "📈 Rising" if prediction > custom_lag1 else "📉 Falling" if prediction < custom_lag1 else "➡️ Stable"
-                                st.metric("Trend vs Previous", trend)
+                            with c_metrics_col:
+                                cm1, cm2 = st.columns(2)
+                                with cm1:
+                                    st.metric(
+                                        "Predicted Inflation",
+                                        f"{prediction:.2f}%",
+                                        delta=f"{delta_vs_prev:+.2f}% vs last month",
+                                        delta_color="inverse"
+                                    )
+                                    st.metric("Trend vs Previous", trend)
+                                with cm2:
+                                    st.metric(
+                                        "3-Month Avg Input",
+                                        f"{custom_lag3:.2f}%",
+                                        help="The 3-month average inflation you entered"
+                                    )
+                                    st.markdown(
+                                        f'<span class="{risk_class}" style="font-size:1.1rem;padding:6px 14px;">'
+                                        f'{risk_label}</span>',
+                                        unsafe_allow_html=True
+                                    )
                             
-                            with result_col3:
-                                if prediction > 10:
-                                    risk = "🔴 High Risk"
-                                elif prediction > 5:
-                                    risk = "🟡 Medium Risk"
-                                else:
-                                    risk = "🟢 Low Risk"
-                                st.metric("Risk Assessment", risk)
-                            
-                            # Detailed interpretation
+                            # Detailed interpretation box
                             month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
                                          'July', 'August', 'September', 'October', 'November', 'December'][custom_month-1]
                             
+                            direction = "increase" if prediction > custom_lag1 else "decrease"
+                            change_pp  = abs(prediction - custom_lag1)
+                            
+                            if prediction > RISK_HIGH_THRESHOLD:
+                                alert = "🚨 HIGH INFLATION ALERT"
+                                advice = "Immediate monitoring and policy response may be needed."
+                            elif prediction > RISK_LOW_THRESHOLD:
+                                alert = "⚠️ MODERATE INFLATION"
+                                advice = "Budget adjustments and continued monitoring are advisable."
+                            else:
+                                alert = "✅ LOW INFLATION"
+                                advice = "Prices are expected to remain relatively stable."
+                            
                             st.markdown(f"""
                             <div class="outcome-box">
-                            <strong>Prediction Summary for {custom_country} - {month_name} {custom_year}</strong><br><br>
-                            
-                            Based on the provided inputs, the model predicts an inflation rate of 
-                            <strong>{prediction:.2f}%</strong>. This represents a 
-                            {abs(prediction - custom_lag1):.2f} percentage point 
-                            {'increase' if prediction > custom_lag1 else 'decrease'} 
-                            compared to the previous month's inflation of {custom_lag1:.2f}%.
-                            
+                            <strong>{alert} — {custom_country}, {month_name} {custom_year}</strong><br><br>
+                            Predicted inflation: <strong>{prediction:.2f}%</strong> — 
+                            a {change_pp:.2f} pp {direction} vs the previous month ({custom_lag1:.2f}%). {advice}
                             <br><br>
-                            <strong>Input Summary:</strong>
-                            <ul>
-                                <li>Price Index: {custom_close:.2f}</li>
-                                <li>Price Volatility: {custom_range:.4f}</li>
-                                <li>Previous Inflation: {custom_lag1:.2f}%</li>
-                                <li>3-Month Avg: {custom_lag3:.2f}%</li>
-                            </ul>
+                            <strong>Input Summary:</strong> Price Index {custom_close:.2f} · 
+                            Volatility {custom_range:.4f} · Previous Inflation {custom_lag1:.2f}% · 
+                            3-Month Avg {custom_lag3:.2f}%
                             </div>
                             """, unsafe_allow_html=True)
                             
@@ -1829,6 +2119,14 @@ df['quarter'] = df['date'].dt.quarter
     # ============= PAGE: COUNTRY EXPLORER =============
     elif page == "Country Explorer":
         st.markdown('<p class="section-header">Country Analysis Explorer</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — Compare all countries side-by-side or drill into one using the
+        sidebar filter. The table below ranks every country by average inflation. Use the
+        <strong>📊 Download</strong> buttons to export the data you’re viewing.
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("""
         This interactive section allows you to explore the food price data for specific countries 
@@ -1893,6 +2191,14 @@ df['quarter'] = df['date'].dt.quarter
     # ============= PAGE: ABOUT =============
     elif page == "About":
         st.markdown('<p class="section-header">About This Project</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — This dashboard was built by a three-person team for the Code 
+        Institute Data Analytics Hackathon. It analyses global food price inflation across 25 countries 
+        (2007–2023) using statistical testing and machine learning to forecast future inflation trends.
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("""
         This project was developed as part of the Code Institute Data Analytics Hackathon in March 2026. 
