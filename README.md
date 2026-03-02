@@ -1,72 +1,354 @@
 # ![CI logo](https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png)
 
-## Template Instructions
+# Food Price Inflation Analysis
 
-Welcome,
+## Team Members
 
-This is the Code Institute student template for the Data Analytics capstone project. We have preinstalled all of the tools you need to get started. It's perfectly okay to use this template as the basis for your project submissions. Click the `Use this template` button above to get started.
+This project was developed as part of a Code Institute Hackathon by:
 
-You can safely delete the Template Instructions section of this README.md file and modify the remaining paragraphs for your own project. Please do read the Template Instructions at least once, though! It contains some important information about the IDE and the extensions we use.
+| Name | Role |
+|------|------|
+| **Sergio** | Data Analysis & Machine Learning |
+| **Gia** | Data Cleaning & Visualisation |
+| **Florence** | Hypothesis Testing & Documentation |
 
-## How to use this repo
+---
 
-1. Use this template to create your GitHub project repo. Click the **Use this template** button, then click **Create a new repository**.
+## Project Overview
 
-1. Copy the URL of your repository to your clipboard.
+This project analyses global food price inflation trends using the World Real-Time Food Prices (RTFP) dataset. The analysis aims to understand how food prices have evolved across different countries over time, identify patterns in inflation, and provide actionable insights for stakeholders.
 
-1. In VS Code, select **File** -> **Open Folder**.
+### Business Problem
 
-1. Select your `vscode-projects` folder, then click the **Select Folder** button on Windows, or the **Open** button on Mac.
+Food price inflation significantly impacts economies and household budgets worldwide. Understanding these trends helps policymakers, businesses, and consumers make informed decisions. This project addresses:
+- How have food prices changed across different regions?
+- What are the key drivers of food price inflation?
+- Can we identify patterns or predict future trends?
 
-1. From the top menu in VS Code, select **Terminal** > **New Terminal** to open the terminal.
+---
 
-1. In the terminal, type `git clone` followed by the URL of your GitHub repository. Then hit **Enter**. This command will download all the files in your GitHub repository into your vscode-projects folder.
+## Table of Contents
 
-1. In VS Code, select **File** > **Open Folder** again.
+1. [Dataset Information](#dataset-information)
+2. [Project Objectives](#project-objectives)
+3. [Methodology](#methodology)
+4. [Project Structure](#project-structure)
+5. [ETL Pipeline](#etl-pipeline)
+6. [Data Analysis](#data-analysis)
+7. [Visualisations](#visualisations)
+8. [Key Findings](#key-findings)
+9. [Ethical Considerations](#ethical-considerations)
+10. [Installation & Setup](#installation--setup)
+11. [Technologies Used](#technologies-used)
+12. [Future Improvements](#future-improvements)
+13. [Credits & References](#credits--references)
 
-1. This time, navigate to and select the folder for the project you just downloaded. Then, click **Select Folder**.
+---
 
-1. A virtual environment is necessary when working with Python projects to ensure each project's dependencies are kept separate from each other. You need to create your virtual environment, also called a venv, and then ensure that it is activated any time you return to your workspace.
-Click the gear icon in the lower left-hand corner of the screen to open the Manage menu and select **Command Palette** to open the VS Code command palette.
+## Dataset Information
 
-1. In the command palette, type: *create environment* and select **Python: Create Environment…**
+**Source**: World Bank - Real-Time Food Prices (RTFP)  
+**File**: `data/raw/WLD_RTFP_country_2023-10-02.csv`  
+**Time Period**: January 2007 - October 2023  
+**Records**: 4,798 observations  
 
-1. Choose **Venv** from the dropdown list.
+### Variables
 
-1. Choose the Python version you installed earlier. Currently, we recommend Python 3.12.8
+| Variable | Description | Type |
+|----------|-------------|------|
+| Open | Opening price index for the month | Float |
+| High | Highest price index for the month | Float |
+| Low | Lowest price index for the month | Float |
+| Close | Closing price index for the month | Float |
+| Inflation | Year-over-year inflation rate (%) | Float |
+| country | Country name | String |
+| ISO3 | ISO 3166-1 alpha-3 country code | String |
+| date | Date of observation (monthly) | Date |
 
-1. **DO NOT** click the box next to `requirements.txt`, as you need to do more steps before you can install your dependencies. Click **OK**.
+---
 
-1. You will see a `.venv` folder appear in the file explorer pane to show that the virtual environment has been created.
+## Project Objectives
 
-1. **Important**: Note that the `.venv` folder is in the `.gitignore` file so that Git won't track it.
+### Primary Objectives
+1. **Analyse global food price trends** across multiple countries and time periods
+2. **Identify inflation patterns** and their correlation with price movements
+3. **Develop statistical insights** to understand price volatility
+4. **Create visualisations** that communicate findings to diverse audiences
 
-1. Return to the terminal by clicking on the TERMINAL tab, or click on the **Terminal** menu and choose **New Terminal** if no terminal is currently open.
+### Learning Outcomes Addressed
+- LO1: Apply core principles of statistics and probability
+- LO2: Demonstrate practical data manipulation skills with Python
+- LO3: Analyse real-world problems using data analytics
+- LO4: Utilise Jupyter Notebooks enhanced by AI assistance
+- LO5: Implement effective data management practices
+- LO6: Address ethical considerations in data analytics
+- LO7: Design independent research methodology
+- LO8: Communicate complex insights effectively
+- LO9: Apply data analytics across domains
+- LO10: Plan and evaluate data analytics projects
+- LO11: Adapt to new tools and methodologies
 
-1. In the terminal, use the command below to install your dependencies. This may take several minutes.
+---
 
- ```console
- pip3 install -r requirements.txt
- ```
+## Methodology
 
-1. Open the `jupyter_notebooks` directory, and click on the notebook you want to open.
+### Research Approach
+This project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mining)** methodology:
 
-1. Click the **kernel** button and choose **Python Environments**.
+1. **Business Understanding**: Define the problem and objectives
+2. **Data Understanding**: Explore and assess the dataset
+3. **Data Preparation**: Clean, transform, and prepare data
+4. **Modeling**: Apply statistical analysis and hypothesis testing
+5. **Evaluation**: Assess results and validate findings
+6. **Deployment**: Create visualisations and documentation
 
-Note that the kernel says `Python 3.12.8` as it inherits from the venv, so it will be Python-3.12.8 if that is what is installed on your PC. To confirm this, you can use the command below in a notebook code cell.
+### Hypothesis Testing
 
-```console
-! python --version
+**H1**: Food price inflation varies significantly across different regions  
+**H2**: Price volatility (High-Low range) correlates with inflation rates  
+**H3**: There are seasonal patterns in food price movements  
+
+---
+
+## Project Structure
+
+```
+Food_price_inflation_analysis/
+│
+├── data/
+│   ├── raw/                          # Original, immutable data
+│   │   └── WLD_RTFP_country_2023-10-02.csv
+│   └── cleaned/                      # Processed, cleaned data
+│       └── food_prices_cleaned.csv
+│
+├── jupyter_notebooks/
+│   ├── Data_Cleaning.ipynb          # ETL and data preprocessing
+│   ├── Data_Analysis.ipynb          # Statistical analysis
+│   ├── Hypothesis_Testing.ipynb     # Statistical tests and insights
+│   └── ML_Predictions.ipynb         # Machine learning models
+│
+├── outputs/
+│   ├── figures/                      # Generated visualisations
+│   ├── models/                       # Trained ML models (.joblib)
+│   └── reports/                      # Analysis reports (CSV)
+│
+├── app.py                            # Streamlit dashboard
+├── .gitignore
+├── Procfile
+├── README.md
+├── requirements.txt
+└── setup.sh
 ```
 
-## Deployment Reminders
+---
 
-* Set the `.python-version` Python version to a [Heroku-22](https://devcenter.heroku.com/articles/python-support#supported-runtimes) stack currently supported version that closest matches what you used in this project.
-* The project can be deployed to Heroku using the following steps.
+## ETL Pipeline
+
+### Extract
+- Loaded raw CSV data from World Bank RTFP dataset
+- Verified data integrity and structure
+
+### Transform
+- Converted date columns to datetime format
+- Handled missing values in inflation column (364 records with NaN)
+- Renamed columns to snake_case for consistency
+- Created derived features:
+  - `price_range`: High - Low (volatility indicator)
+  - `price_change`: Close - Open
+  - `price_change_pct`: Percentage change within period
+  - `year`, `month`, `month_name`: Temporal decomposition
+  - `inflation_available`: Flag for data completeness
+
+### Load
+- Saved cleaned data to `data/cleaned/food_prices_cleaned.csv`
+- Maintained data lineage documentation
+
+### Validation Checks
+- ✅ No negative prices detected
+- ✅ High >= Low consistency verified
+- ✅ No duplicate records found
+- ✅ Date range: 2007-01-01 to 2023-10-01
+
+---
+
+## Data Analysis
+
+### Statistical Summary
+
+| Metric | Description |
+|--------|-------------|
+| Countries | 24 unique countries analysed |
+| Time Span | 16+ years of monthly data |
+| Inflation Range | -31.37% to 96.79% |
+
+### Key Analyses Performed
+1. **Descriptive Statistics**: Central tendency, dispersion measures
+2. **Time Series Analysis**: Trend identification, seasonality
+3. **Correlation Analysis**: Price-inflation relationships
+4. **Comparative Analysis**: Cross-country comparisons
+
+---
+
+## Visualisations
+
+Visualisations are created using:
+- **Matplotlib/Seaborn**: Static statistical plots
+- **Plotly**: Interactive visualisations
+- **Power BI/Tableau**: Interactive dashboards
+
+### Dashboard Features
+- Filtering by country, date range
+- Interactive time series exploration
+- Comparative analysis views
+- Drill-down capabilities
+
+---
+
+## Key Findings
+
+### Statistical Test Results
+
+| Hypothesis | Test Used | p-value | Result |
+|------------|-----------|---------|--------|
+| **H1:** Countries have different inflation rates | Kruskal-Wallis | < 0.05 | ✅ Significant |
+| **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
+| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
+| **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
+
+### Key Insights
+
+1. **Regional Disparities**: Food price inflation varies significantly across countries, indicating that local factors (supply chains, policies, climate) play a crucial role
+2. **Volatility-Inflation Link**: Higher price volatility is associated with higher inflation rates, suggesting that price stabilisation policies could help control inflation
+3. **Long-term Upward Trend**: Food prices have significantly increased from 2007 to 2023, raising concerns about food affordability globally
+4. **Predictive Potential**: Machine learning models can forecast inflation trends with reasonable accuracy, enabling proactive policy responses
+
+---
+
+## Ethical Considerations
+
+### Data Privacy & Governance
+- **Data Source**: Publicly available World Bank dataset
+- **No PII**: Dataset contains aggregate economic indicators only
+- **Transparency**: All data sources and transformations documented
+- **Reproducibility**: Analysis can be fully reproduced from raw data
+
+### Legal Implications
+- Data used under World Bank open data licence
+- No commercial restrictions on analysis
+- Findings presented objectively without political bias
+
+### Social Considerations
+- Food price data affects vulnerable populations
+- Analysis aims to inform, not exploit
+- Findings presented with appropriate context
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+- Python 3.12+
+- pip package manager
+- Git
+
+### Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/Food_price_inflation_analysis.git
+   cd Food_price_inflation_analysis
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Linux/Mac
+   .venv\Scripts\activate     # Windows
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run Jupyter notebooks**
+   ```bash
+   jupyter notebook
+   ```
+
+---
+
+## Technologies Used
+
+| Technology | Purpose |
+|-----------|---------|
+| Python 3.12 | Primary programming language |
+| Pandas | Data manipulation and analysis |
+| NumPy | Numerical computations |
+| Matplotlib | Static visualisations |
+| Seaborn | Statistical visualisations |
+| Plotly | Interactive visualisations |
+| SciPy | Statistical testing |
+| Jupyter Notebook | Interactive analysis environment |
+| Git/GitHub | Version control |
+| Power BI/Tableau | Dashboard creation |
+
+---
+
+## Future Improvements
+
+1. **Enhanced Predictive Models**: Incorporate ARIMA/SARIMA for better time series forecasting
+2. **Additional Data Sources**: Integrate macroeconomic indicators (GDP, exchange rates, oil prices)
+3. **Real-time Updates**: Automate data refresh pipeline with scheduled API calls
+4. **API Development**: Create REST API endpoints for data access
+5. **Extended Geographic Coverage**: Include more countries and regional breakdowns
+6. **Deep Learning Models**: Implement LSTM networks for sequential pattern recognition
+7. **Anomaly Detection**: Add alerts for unusual price movements
+
+---
+
+## Credits & References
+
+### Data Sources
+- [World Bank - Real-Time Food Prices](https://www.worldbank.org/en/programs/food-prices-for-nutrition)
+
+### Code Attribution
+- Code Institute template and guidance
+- AI-assisted development (documented in notebooks)
+
+### Acknowledgements
+- Code Institute for the project template
+- World Bank for the open data
+
+---
+
+## Deployment
+
+### Heroku Deployment
 
 1. Log in to Heroku and create an App
-2. At the **Deploy** tab, select **GitHub** as the deployment method.
-3. Select your repository name and click **Search**. Once it is found, click **Connect**.
-4. Select the branch you want to deploy, then click **Deploy Branch**.
-5. The deployment process should happen smoothly if all deployment files are fully functional. Click the button **Open App** at the top of the page to access your App.
-6. If the slug size is too large, then add large files not required for the app to the `.slugignore` file.
+2. At the **Deploy** tab, select **GitHub** as the deployment method
+3. Select your repository name and click **Connect**
+4. Select the branch you want to deploy, then click **Deploy Branch**
+5. Click **Open App** to access your application
+
+---
+
+## Live Dashboard
+
+Explore the interactive Streamlit dashboard to visualise trends and predictions:
+- **Local**: Run `streamlit run app.py` after setup
+- **Deployed**: [Link to deployed app on Heroku/Streamlit Cloud]
+
+---
+
+## Contact
+
+For questions or collaboration opportunities, please reach out through GitHub issues.
+
+**Team**: Sergio, Gia & Florence  
+**Hackathon**: Code Institute Data Analytics
+
+---
+
+*Last Updated: March 2026*
