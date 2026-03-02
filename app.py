@@ -70,6 +70,15 @@ st.markdown("""
         margin: 1rem 0;
         border-radius: 0 5px 5px 0;
     }
+    /* Navigation button styling */
+    div[data-testid="column"] button {
+        font-size: 0.75rem !important;
+        padding: 0.3rem 0.2rem !important;
+        white-space: nowrap;
+    }
+    div[data-testid="column"] button p {
+        font-size: 0.75rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -453,6 +462,10 @@ def create_interactive_country_lines(df):
 def main():
     """Main application."""
     
+    # Initialize session state for navigation
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "Overview"
+    
     # Header
     st.markdown('<p class="main-header">🌾 Food Price Inflation Analysis</p>', unsafe_allow_html=True)
     st.markdown("""
@@ -462,21 +475,46 @@ def main():
     </p>
     """, unsafe_allow_html=True)
     
+    # Navigation Bar in Header (visible on all pages)
+    nav_pages = ["Overview", "Data Cleaning", "Data Analysis", "Hypothesis Testing", 
+                 "ML Predictions", "Prediction Tool", "Country Explorer", "About"]
+    nav_icons = ["🏠", "🧹", "📊", "🔬", "🤖", "🔮", "🌍", "ℹ️"]
+    
+    # Create navigation buttons in columns
+    nav_cols = st.columns(len(nav_pages))
+    for i, (col, nav_page, icon) in enumerate(zip(nav_cols, nav_pages, nav_icons)):
+        with col:
+            if st.button(f"{icon} {nav_page}", key=f"nav_{nav_page}", use_container_width=True,
+                        type="primary" if st.session_state.current_page == nav_page else "secondary"):
+                st.session_state.current_page = nav_page
+                st.rerun()
+    
+    st.markdown("---")
+    
     # Load data
     df = load_data()
     if df is None:
         return
     
+    # Use session state for current page
+    page = st.session_state.current_page
+    
     # Sidebar
     st.sidebar.image("https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png", width=200)
     st.sidebar.title("Dashboard Controls")
     
-    # Navigation
-    page = st.sidebar.radio(
+    # Sidebar navigation (synced with header)
+    sidebar_page = st.sidebar.radio(
         "Navigate to:",
-        ["Overview", "Data Cleaning", "Data Analysis", "Hypothesis Testing", 
-         "ML Predictions", "Country Explorer", "About"]
+        nav_pages,
+        index=nav_pages.index(page),
+        key="sidebar_nav"
     )
+    
+    # Sync sidebar selection with session state
+    if sidebar_page != page:
+        st.session_state.current_page = sidebar_page
+        st.rerun()
     
     # Filters
     st.sidebar.markdown("---")
@@ -575,6 +613,38 @@ def main():
         controlling food price inflation.
         </div>
         """, unsafe_allow_html=True)
+        
+        # Quick Actions
+        st.markdown('<p class="section-header">Quick Actions</p>', unsafe_allow_html=True)
+        
+        action_col1, action_col2, action_col3 = st.columns(3)
+        
+        with action_col1:
+            st.markdown("""
+            <div class="explanation-box">
+            <strong>🔮 Prediction Tool</strong><br>
+            Use our ML model to forecast inflation for any country and time period.
+            Navigate to <em>Prediction Tool</em> in the sidebar.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with action_col2:
+            st.markdown("""
+            <div class="outcome-box">
+            <strong>🌍 Country Explorer</strong><br>
+            Dive deep into country-specific data, compare statistics, and export data.
+            Navigate to <em>Country Explorer</em> in the sidebar.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with action_col3:
+            st.markdown("""
+            <div class="recommendation-box">
+            <strong>📊 Hypothesis Testing</strong><br>
+            Review our statistical findings and validated hypotheses about food prices.
+            Navigate to <em>Hypothesis Testing</em> in the sidebar.
+            </div>
+            """, unsafe_allow_html=True)
     
     # ============= PAGE: DATA CLEANING =============
     elif page == "Data Cleaning":
@@ -1233,172 +1303,6 @@ df['quarter'] = df['date'].dt.quarter
                 st.image(img, use_container_width=True)
             except FileNotFoundError:
                 st.info("Feature importance chart not available.")
-            
-            # ============= PREDICTION TOOL =============
-            st.markdown('<p class="section-header">Inflation Prediction Tool</p>', unsafe_allow_html=True)
-            
-            st.markdown("""
-            Use this interactive tool to predict food price inflation based on various input parameters. 
-            Enter the historical data and conditions below, and the machine learning model will generate 
-            a prediction for the expected inflation rate. This tool demonstrates how the model can be 
-            used for forecasting purposes, though predictions should be interpreted with appropriate 
-            caution given the inherent uncertainties in economic forecasting.
-            """)
-            
-            # Create prediction interface
-            pred_col1, pred_col2 = st.columns(2)
-            
-            with pred_col1:
-                st.subheader("Historical Data Inputs")
-                
-                pred_country = st.selectbox(
-                    "Select Country for Prediction",
-                    sorted(df['country'].unique().tolist()),
-                    key="pred_country"
-                )
-                
-                pred_year = st.number_input(
-                    "Year",
-                    min_value=2020,
-                    max_value=2030,
-                    value=2024,
-                    key="pred_year"
-                )
-                
-                pred_month = st.selectbox(
-                    "Month",
-                    options=list(range(1, 13)),
-                    format_func=lambda x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x-1],
-                    key="pred_month"
-                )
-                
-                pred_quarter = (pred_month - 1) // 3 + 1
-                st.info(f"Quarter: Q{pred_quarter}")
-            
-            with pred_col2:
-                st.subheader("Price & Lag Features")
-                
-                # Dynamic min/max based on actual data ranges
-                close_min, close_max = float(df['close'].min()), float(df['close'].max())
-                range_min, range_max = float(df['price_range'].min()), float(df['price_range'].max())
-                inflation_min, inflation_max = float(df['inflation'].min()), float(df['inflation'].max())
-                
-                pred_close = st.number_input(
-                    "Current Price Index",
-                    min_value=close_min * 0.5,
-                    max_value=close_max * 1.5,
-                    value=float(df['close'].median()),
-                    format="%.4f",
-                    key="pred_close"
-                )
-                
-                pred_price_range = st.number_input(
-                    "Price Volatility (High - Low)",
-                    min_value=0.0,
-                    max_value=max(range_max * 1.5, 1.0),
-                    value=float(df['price_range'].median()),
-                    format="%.4f",
-                    key="pred_range"
-                )
-                
-                pred_inflation_lag1 = st.number_input(
-                    "Previous Month's Inflation (%)",
-                    min_value=min(inflation_min * 1.5, -100.0),
-                    max_value=max(inflation_max * 1.5, 100.0),
-                    value=float(df['inflation'].median()),
-                    format="%.2f",
-                    key="pred_lag1"
-                )
-            
-            # Make prediction
-            if st.button("Generate Prediction", type="primary", use_container_width=True):
-                try:
-                    # Get country data for historical averages
-                    country_data = df[df['country'] == pred_country]
-                    
-                    # Create feature dictionary with basic features
-                    input_features = {
-                        'year': pred_year,
-                        'month': pred_month,
-                        'quarter': pred_quarter,
-                        'close': pred_close,
-                        'price_range': pred_price_range,
-                        'inflation_lag_1': pred_inflation_lag1,
-                        'inflation_lag_3': country_data['inflation'].shift(3).mean() if len(country_data) > 3 else pred_inflation_lag1,
-                        'inflation_lag_6': country_data['inflation'].shift(6).mean() if len(country_data) > 6 else pred_inflation_lag1,
-                        'inflation_lag_12': country_data['inflation'].shift(12).mean() if len(country_data) > 12 else pred_inflation_lag1,
-                        'price_lag_1': country_data['close'].shift(1).mean() if len(country_data) > 1 else pred_close,
-                        'price_ma_3': country_data['close'].rolling(3).mean().mean() if len(country_data) > 3 else pred_close,
-                        'price_ma_6': country_data['close'].rolling(6).mean().mean() if len(country_data) > 6 else pred_close,
-                        'price_ma_12': country_data['close'].rolling(12).mean().mean() if len(country_data) > 12 else pred_close,
-                        'inflation_ma_3': country_data['inflation'].rolling(3).mean().mean() if len(country_data) > 3 else pred_inflation_lag1,
-                        'inflation_ma_6': country_data['inflation'].rolling(6).mean().mean() if len(country_data) > 6 else pred_inflation_lag1,
-                    }
-                    
-                    # Add country encoding
-                    if encoder is not None:
-                        try:
-                            input_features['country_encoded'] = encoder.transform([pred_country])[0]
-                        except:
-                            input_features['country_encoded'] = 0
-                    
-                    # Create dataframe with available features
-                    input_df = pd.DataFrame([input_features])
-                    
-                    # Ensure we have the right columns in the right order
-                    if feature_cols is not None:
-                        for col in feature_cols:
-                            if col not in input_df.columns:
-                                input_df[col] = 0
-                        input_df = input_df[feature_cols]
-                    
-                    # Scale features if scaler available
-                    if scaler is not None:
-                        input_scaled = scaler.transform(input_df)
-                    else:
-                        input_scaled = input_df.values
-                    
-                    # Make prediction
-                    prediction = model.predict(input_scaled)[0]
-                    
-                    # Display result
-                    st.markdown("---")
-                    st.markdown('<p class="section-header">Prediction Result</p>', unsafe_allow_html=True)
-                    
-                    result_col1, result_col2, result_col3 = st.columns(3)
-                    
-                    with result_col1:
-                        st.metric("Predicted Inflation", f"{prediction:.2f}%")
-                    
-                    with result_col2:
-                        trend = "Rising" if prediction > pred_inflation_lag1 else "Falling" if prediction < pred_inflation_lag1 else "Stable"
-                        st.metric("Trend", trend)
-                    
-                    with result_col3:
-                        risk = "High" if prediction > 10 else "Medium" if prediction > 5 else "Low"
-                        st.metric("Risk Level", risk)
-                    
-                    # Interpretation
-                    if prediction > 10:
-                        interpretation = f"The model predicts HIGH inflation of {prediction:.2f}% for {pred_country} in this period. This suggests significant upward pressure on food prices, which could impact food affordability for consumers and require careful planning by businesses and policymakers."
-                    elif prediction > 5:
-                        interpretation = f"The model predicts MODERATE inflation of {prediction:.2f}% for {pred_country} in this period. While not severe, this level of inflation warrants attention and may require some adjustments to food budgets and supply chain planning."
-                    elif prediction > 0:
-                        interpretation = f"The model predicts LOW POSITIVE inflation of {prediction:.2f}% for {pred_country} in this period. This represents relatively stable food prices with mild upward pressure, generally within normal economic expectations."
-                    else:
-                        interpretation = f"The model predicts NEGATIVE inflation (deflation) of {prediction:.2f}% for {pred_country} in this period. This suggests falling food prices, which could benefit consumers but may indicate oversupply or weak demand in the agricultural sector."
-                    
-                    st.markdown(f"""
-                    <div class="outcome-box">
-                    <strong>Interpretation:</strong><br><br>
-                    {interpretation}
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                except Exception as e:
-                    st.error(f"Error making prediction: {str(e)}")
-                    st.info("Please ensure the ML model has been trained and saved properly by running the ML_Predictions notebook.")
         
         st.markdown('<p class="section-header">Model Limitations</p>', unsafe_allow_html=True)
         
@@ -1425,6 +1329,502 @@ df['quarter'] = df['date'].dt.quarter
         precise forecasts, especially for longer time horizons.
         </div>
         """, unsafe_allow_html=True)
+    
+    # ============= PAGE: PREDICTION TOOL =============
+    elif page == "Prediction Tool":
+        st.markdown('<p class="main-header">🔮 Inflation Prediction Tool</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        Use this interactive tool to predict food price inflation based on various input parameters. 
+        The machine learning model uses historical patterns and country-specific features to generate 
+        predictions. Choose between **Quick Prediction** using auto-filled historical data or 
+        **Custom Prediction** with manual inputs.
+        """)
+        
+        model, scaler, encoder, feature_cols = load_model()
+        
+        if model is None:
+            st.error("""
+            ⚠️ **Model Not Available**
+            
+            The machine learning model has not been trained yet. Please run the `ML_Predictions.ipynb` 
+            notebook to train and save the model, then return to this page.
+            """)
+        else:
+            st.success("✅ Machine learning model loaded successfully!")
+            
+            # Prediction mode selection
+            prediction_mode = st.radio(
+                "Select Prediction Mode:",
+                ["🚀 Quick Prediction", "⚙️ Custom Prediction"],
+                horizontal=True,
+                help="Quick mode uses historical averages, Custom mode allows manual input"
+            )
+            
+            st.markdown("---")
+            
+            if prediction_mode == "🚀 Quick Prediction":
+                st.markdown('<p class="section-header">Quick Prediction</p>', unsafe_allow_html=True)
+                
+                st.markdown("""
+                <div class="explanation-box">
+                Select a country and target period. The model will automatically use the most recent 
+                historical data and averages to generate a prediction. This mode is ideal for quick 
+                forecasts without manual data entry.
+                </div>
+                """, unsafe_allow_html=True)
+                
+                quick_col1, quick_col2, quick_col3 = st.columns(3)
+                
+                with quick_col1:
+                    quick_country = st.selectbox(
+                        "🌍 Select Country",
+                        sorted(df['country'].unique().tolist()),
+                        key="quick_country"
+                    )
+                
+                with quick_col2:
+                    quick_year = st.selectbox(
+                        "📅 Target Year",
+                        options=[2024, 2025, 2026, 2027, 2028],
+                        index=2,
+                        key="quick_year"
+                    )
+                
+                with quick_col3:
+                    quick_month = st.selectbox(
+                        "📆 Target Month",
+                        options=list(range(1, 13)),
+                        format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
+                                              'July', 'August', 'September', 'October', 'November', 'December'][x-1],
+                        key="quick_month"
+                    )
+                
+                # Get country historical data
+                country_data = df[df['country'] == quick_country].sort_values('date')
+                
+                if len(country_data) > 0:
+                    latest = country_data.iloc[-1]
+                    
+                    # Display historical context
+                    st.markdown('<p class="section-header">Historical Context</p>', unsafe_allow_html=True)
+                    
+                    hist_col1, hist_col2, hist_col3, hist_col4 = st.columns(4)
+                    
+                    with hist_col1:
+                        st.metric("Latest Price Index", f"{latest['close']:.2f}")
+                    with hist_col2:
+                        st.metric("Latest Inflation", f"{latest['inflation']:.2f}%" if pd.notna(latest['inflation']) else "N/A")
+                    with hist_col3:
+                        avg_inflation = country_data['inflation'].mean()
+                        st.metric("Avg Inflation", f"{avg_inflation:.2f}%")
+                    with hist_col4:
+                        volatility = country_data['price_range'].mean()
+                        st.metric("Avg Volatility", f"{volatility:.4f}")
+                    
+                    # Quick prediction button
+                    if st.button("🔮 Generate Quick Prediction", type="primary", use_container_width=True):
+                        with st.spinner("Generating prediction..."):
+                            try:
+                                quick_quarter = (quick_month - 1) // 3 + 1
+                                
+                                # Auto-fill features from historical data
+                                input_features = {
+                                    'year': quick_year,
+                                    'month': quick_month,
+                                    'quarter': quick_quarter,
+                                    'close': float(latest['close']),
+                                    'price_range': float(country_data['price_range'].mean()),
+                                    'inflation_lag_1': float(latest['inflation']) if pd.notna(latest['inflation']) else float(country_data['inflation'].mean()),
+                                    'inflation_lag_3': float(country_data['inflation'].tail(3).mean()),
+                                    'inflation_lag_6': float(country_data['inflation'].tail(6).mean()),
+                                    'inflation_lag_12': float(country_data['inflation'].tail(12).mean()),
+                                    'price_lag_1': float(country_data['close'].iloc[-1]) if len(country_data) > 0 else float(latest['close']),
+                                    'price_ma_3': float(country_data['close'].tail(3).mean()),
+                                    'price_ma_6': float(country_data['close'].tail(6).mean()),
+                                    'price_ma_12': float(country_data['close'].tail(12).mean()),
+                                    'inflation_ma_3': float(country_data['inflation'].tail(3).mean()),
+                                    'inflation_ma_6': float(country_data['inflation'].tail(6).mean()),
+                                }
+                                
+                                # Add country encoding
+                                if encoder is not None:
+                                    try:
+                                        input_features['country_encoded'] = encoder.transform([quick_country])[0]
+                                    except:
+                                        input_features['country_encoded'] = 0
+                                
+                                # Create dataframe
+                                input_df = pd.DataFrame([input_features])
+                                
+                                # Ensure correct columns
+                                if feature_cols is not None:
+                                    for col in feature_cols:
+                                        if col not in input_df.columns:
+                                            input_df[col] = 0
+                                    input_df = input_df[feature_cols]
+                                
+                                # Scale and predict
+                                if scaler is not None:
+                                    input_scaled = scaler.transform(input_df)
+                                else:
+                                    input_scaled = input_df.values
+                                
+                                prediction = model.predict(input_scaled)[0]
+                                
+                                # Display results
+                                st.markdown("---")
+                                st.markdown('<p class="section-header">📊 Prediction Results</p>', unsafe_allow_html=True)
+                                
+                                # Create visual result cards
+                                result_col1, result_col2, result_col3 = st.columns(3)
+                                
+                                with result_col1:
+                                    delta_val = prediction - (float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation)
+                                    st.metric(
+                                        "Predicted Inflation",
+                                        f"{prediction:.2f}%",
+                                        delta=f"{delta_val:+.2f}%",
+                                        delta_color="inverse"
+                                    )
+                                
+                                with result_col2:
+                                    if prediction > float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation:
+                                        trend = "📈 Rising"
+                                    elif prediction < float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation:
+                                        trend = "📉 Falling"
+                                    else:
+                                        trend = "➡️ Stable"
+                                    st.metric("Trend", trend)
+                                
+                                with result_col3:
+                                    if prediction > 10:
+                                        risk = "🔴 High"
+                                        risk_color = "red"
+                                    elif prediction > 5:
+                                        risk = "🟡 Medium"
+                                        risk_color = "orange"
+                                    else:
+                                        risk = "🟢 Low"
+                                        risk_color = "green"
+                                    st.metric("Risk Level", risk)
+                                
+                                # Interpretation
+                                month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                             'July', 'August', 'September', 'October', 'November', 'December'][quick_month-1]
+                                
+                                if prediction > 10:
+                                    interpretation = f"🚨 **HIGH INFLATION ALERT**: The model predicts significant inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This could severely impact food affordability and requires immediate attention from policymakers."
+                                elif prediction > 5:
+                                    interpretation = f"⚠️ **MODERATE INFLATION**: The model predicts inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This warrants monitoring and may require budget adjustments."
+                                elif prediction > 0:
+                                    interpretation = f"✅ **LOW INFLATION**: The model predicts mild inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This is within normal economic expectations."
+                                else:
+                                    interpretation = f"📉 **DEFLATION**: The model predicts negative inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. Food prices are expected to decrease."
+                                
+                                st.markdown(f"""
+                                <div class="outcome-box">
+                                {interpretation}
+                                </div>
+                                """, unsafe_allow_html=True)
+                                
+                                # Show comparison chart
+                                st.markdown('<p class="section-header">Historical Comparison</p>', unsafe_allow_html=True)
+                                
+                                # Create comparison chart
+                                recent_inflation = country_data.tail(12)[['date', 'inflation']].dropna()
+                                if len(recent_inflation) > 0:
+                                    fig = go.Figure()
+                                    
+                                    fig.add_trace(go.Scatter(
+                                        x=recent_inflation['date'],
+                                        y=recent_inflation['inflation'],
+                                        mode='lines+markers',
+                                        name='Historical',
+                                        line=dict(color='steelblue', width=2)
+                                    ))
+                                    
+                                    # Add prediction point
+                                    pred_date = pd.Timestamp(year=quick_year, month=quick_month, day=1)
+                                    fig.add_trace(go.Scatter(
+                                        x=[pred_date],
+                                        y=[prediction],
+                                        mode='markers',
+                                        name='Prediction',
+                                        marker=dict(color='coral', size=15, symbol='star')
+                                    ))
+                                    
+                                    fig.update_layout(
+                                        title=f"Inflation Trend for {quick_country}",
+                                        xaxis_title="Date",
+                                        yaxis_title="Inflation (%)",
+                                        height=400,
+                                        showlegend=True
+                                    )
+                                    
+                                    st.plotly_chart(fig, use_container_width=True)
+                                
+                            except Exception as e:
+                                st.error(f"❌ Error making prediction: {str(e)}")
+                else:
+                    st.warning(f"No historical data available for {quick_country}")
+            
+            else:  # Custom Prediction
+                st.markdown('<p class="section-header">Custom Prediction</p>', unsafe_allow_html=True)
+                
+                st.markdown("""
+                <div class="explanation-box">
+                Enter your own values for all prediction parameters. This mode allows for scenario 
+                analysis and "what-if" predictions by adjusting individual features.
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Create three-column layout for inputs
+                input_col1, input_col2, input_col3 = st.columns(3)
+                
+                with input_col1:
+                    st.markdown("**🌍 Location & Time**")
+                    
+                    custom_country = st.selectbox(
+                        "Country",
+                        sorted(df['country'].unique().tolist()),
+                        key="custom_country"
+                    )
+                    
+                    custom_year = st.number_input(
+                        "Year",
+                        min_value=2020,
+                        max_value=2035,
+                        value=2026,
+                        key="custom_year"
+                    )
+                    
+                    custom_month = st.selectbox(
+                        "Month",
+                        options=list(range(1, 13)),
+                        format_func=lambda x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x-1],
+                        key="custom_month"
+                    )
+                    
+                    custom_quarter = (custom_month - 1) // 3 + 1
+                    st.info(f"Quarter: Q{custom_quarter}")
+                
+                with input_col2:
+                    st.markdown("**💰 Price Features**")
+                    
+                    custom_close = st.number_input(
+                        "Current Price Index",
+                        min_value=0.0,
+                        max_value=500.0,
+                        value=float(df['close'].median()),
+                        format="%.4f",
+                        key="custom_close",
+                        help="The current food price index value"
+                    )
+                    
+                    custom_range = st.number_input(
+                        "Price Volatility (High - Low)",
+                        min_value=0.0,
+                        max_value=50.0,
+                        value=float(df['price_range'].median()),
+                        format="%.4f",
+                        key="custom_range",
+                        help="Difference between highest and lowest price in the period"
+                    )
+                    
+                    custom_lag1 = st.number_input(
+                        "Previous Month's Inflation (%)",
+                        min_value=-50.0,
+                        max_value=100.0,
+                        value=float(df['inflation'].median()),
+                        format="%.2f",
+                        key="custom_lag1",
+                        help="Inflation rate from the previous month"
+                    )
+                
+                with input_col3:
+                    st.markdown("**📈 Historical Averages**")
+                    
+                    custom_lag3 = st.number_input(
+                        "3-Month Avg Inflation (%)",
+                        min_value=-50.0,
+                        max_value=100.0,
+                        value=float(df['inflation'].median()),
+                        format="%.2f",
+                        key="custom_lag3"
+                    )
+                    
+                    custom_lag6 = st.number_input(
+                        "6-Month Avg Inflation (%)",
+                        min_value=-50.0,
+                        max_value=100.0,
+                        value=float(df['inflation'].median()),
+                        format="%.2f",
+                        key="custom_lag6"
+                    )
+                    
+                    custom_lag12 = st.number_input(
+                        "12-Month Avg Inflation (%)",
+                        min_value=-50.0,
+                        max_value=100.0,
+                        value=float(df['inflation'].median()),
+                        format="%.2f",
+                        key="custom_lag12"
+                    )
+                
+                # Advanced options expander
+                with st.expander("🔧 Advanced Features (Optional)"):
+                    adv_col1, adv_col2 = st.columns(2)
+                    
+                    with adv_col1:
+                        custom_price_ma3 = st.number_input(
+                            "3-Month Price Moving Average",
+                            min_value=0.0,
+                            max_value=500.0,
+                            value=float(df['close'].median()),
+                            format="%.4f",
+                            key="custom_price_ma3"
+                        )
+                        
+                        custom_price_ma6 = st.number_input(
+                            "6-Month Price Moving Average",
+                            min_value=0.0,
+                            max_value=500.0,
+                            value=float(df['close'].median()),
+                            format="%.4f",
+                            key="custom_price_ma6"
+                        )
+                    
+                    with adv_col2:
+                        custom_price_ma12 = st.number_input(
+                            "12-Month Price Moving Average",
+                            min_value=0.0,
+                            max_value=500.0,
+                            value=float(df['close'].median()),
+                            format="%.4f",
+                            key="custom_price_ma12"
+                        )
+                        
+                        custom_inf_ma3 = st.number_input(
+                            "3-Month Inflation Moving Average (%)",
+                            min_value=-50.0,
+                            max_value=100.0,
+                            value=float(df['inflation'].median()),
+                            format="%.2f",
+                            key="custom_inf_ma3"
+                        )
+                
+                # Prediction button
+                if st.button("🔮 Generate Custom Prediction", type="primary", use_container_width=True):
+                    with st.spinner("Processing prediction..."):
+                        try:
+                            input_features = {
+                                'year': custom_year,
+                                'month': custom_month,
+                                'quarter': custom_quarter,
+                                'close': custom_close,
+                                'price_range': custom_range,
+                                'inflation_lag_1': custom_lag1,
+                                'inflation_lag_3': custom_lag3,
+                                'inflation_lag_6': custom_lag6,
+                                'inflation_lag_12': custom_lag12,
+                                'price_lag_1': custom_close,
+                                'price_ma_3': custom_price_ma3 if 'custom_price_ma3' in dir() else custom_close,
+                                'price_ma_6': custom_price_ma6 if 'custom_price_ma6' in dir() else custom_close,
+                                'price_ma_12': custom_price_ma12 if 'custom_price_ma12' in dir() else custom_close,
+                                'inflation_ma_3': custom_inf_ma3 if 'custom_inf_ma3' in dir() else custom_lag3,
+                                'inflation_ma_6': custom_lag6,
+                            }
+                            
+                            if encoder is not None:
+                                try:
+                                    input_features['country_encoded'] = encoder.transform([custom_country])[0]
+                                except:
+                                    input_features['country_encoded'] = 0
+                            
+                            input_df = pd.DataFrame([input_features])
+                            
+                            if feature_cols is not None:
+                                for col in feature_cols:
+                                    if col not in input_df.columns:
+                                        input_df[col] = 0
+                                input_df = input_df[feature_cols]
+                            
+                            if scaler is not None:
+                                input_scaled = scaler.transform(input_df)
+                            else:
+                                input_scaled = input_df.values
+                            
+                            prediction = model.predict(input_scaled)[0]
+                            
+                            # Display results
+                            st.markdown("---")
+                            st.markdown('<p class="section-header">📊 Custom Prediction Results</p>', unsafe_allow_html=True)
+                            
+                            result_col1, result_col2, result_col3 = st.columns(3)
+                            
+                            with result_col1:
+                                st.metric(
+                                    "Predicted Inflation",
+                                    f"{prediction:.2f}%",
+                                    delta=f"{prediction - custom_lag1:+.2f}% vs last month"
+                                )
+                            
+                            with result_col2:
+                                trend = "📈 Rising" if prediction > custom_lag1 else "📉 Falling" if prediction < custom_lag1 else "➡️ Stable"
+                                st.metric("Trend vs Previous", trend)
+                            
+                            with result_col3:
+                                if prediction > 10:
+                                    risk = "🔴 High Risk"
+                                elif prediction > 5:
+                                    risk = "🟡 Medium Risk"
+                                else:
+                                    risk = "🟢 Low Risk"
+                                st.metric("Risk Assessment", risk)
+                            
+                            # Detailed interpretation
+                            month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                         'July', 'August', 'September', 'October', 'November', 'December'][custom_month-1]
+                            
+                            st.markdown(f"""
+                            <div class="outcome-box">
+                            <strong>Prediction Summary for {custom_country} - {month_name} {custom_year}</strong><br><br>
+                            
+                            Based on the provided inputs, the model predicts an inflation rate of 
+                            <strong>{prediction:.2f}%</strong>. This represents a 
+                            {abs(prediction - custom_lag1):.2f} percentage point 
+                            {'increase' if prediction > custom_lag1 else 'decrease'} 
+                            compared to the previous month's inflation of {custom_lag1:.2f}%.
+                            
+                            <br><br>
+                            <strong>Input Summary:</strong>
+                            <ul>
+                                <li>Price Index: {custom_close:.2f}</li>
+                                <li>Price Volatility: {custom_range:.4f}</li>
+                                <li>Previous Inflation: {custom_lag1:.2f}%</li>
+                                <li>3-Month Avg: {custom_lag3:.2f}%</li>
+                            </ul>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                        except Exception as e:
+                            st.error(f"❌ Error making prediction: {str(e)}")
+                            st.info("Please check your input values and try again.")
+            
+            # Disclaimer
+            st.markdown("---")
+            st.markdown("""
+            <div class="recommendation-box">
+            <strong>⚠️ Important Disclaimer</strong><br><br>
+            
+            These predictions are generated by a machine learning model trained on historical data 
+            and should be used for informational purposes only. Actual inflation rates may differ 
+            due to unforeseen economic events, policy changes, or other factors not captured in 
+            historical patterns. Always consult multiple sources when making important decisions.
+            </div>
+            """, unsafe_allow_html=True)
     
     # ============= PAGE: COUNTRY EXPLORER =============
     elif page == "Country Explorer":
@@ -1456,6 +1856,33 @@ df['quarter'] = df['date'].dt.quarter
         
         st.dataframe(country_stats.sort_values('Avg Inflation', ascending=False), 
                      use_container_width=True)
+        
+        # Data Export Section
+        st.markdown('<p class="section-header">📥 Data Export</p>', unsafe_allow_html=True)
+        
+        export_col1, export_col2 = st.columns(2)
+        
+        with export_col1:
+            # Export filtered data
+            csv_data = df_filtered.to_csv(index=False)
+            st.download_button(
+                label="📊 Download Filtered Data (CSV)",
+                data=csv_data,
+                file_name=f"food_price_data_{selected_country.replace(' ', '_').lower()}.csv",
+                mime="text/csv",
+                help="Download the currently filtered dataset"
+            )
+        
+        with export_col2:
+            # Export country statistics
+            stats_csv = country_stats.reset_index().to_csv(index=False)
+            st.download_button(
+                label="📈 Download Country Statistics (CSV)",
+                data=stats_csv,
+                file_name="country_statistics.csv",
+                mime="text/csv",
+                help="Download summary statistics by country"
+            )
         
         # Time series for selected country
         if selected_country != "All Countries":
