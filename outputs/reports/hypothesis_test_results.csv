@@ -1,0 +1,5 @@
+Hypothesis,Question,Test,p-value,Significant
+H1,Regional Differences,Kruskal-Wallis,3.23e-138,✅ YES
+H2,Volatility-Inflation Link,Spearman,8.01e-81,✅ YES
+H3,Seasonal Patterns,Kruskal-Wallis,1.00e+00,❌ NO
+H4,Price Trend Over Time,Mann-Whitney U,nan,❌ NO
