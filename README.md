@@ -107,6 +107,9 @@ This project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mi
 **H1**: Food price inflation varies significantly across different regions  
 **H2**: Price volatility (High-Low range) correlates with inflation rates  
 **H3**: There are seasonal patterns in food price movements  
+**H4**: Inflation rates differ significantly across food categories
+**H5**: Time-series models can reasonably forecast short-term food price trends 
+
 
 ---
 
@@ -214,6 +217,9 @@ Visualisations are created using:
 | **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
 | **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
 | **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
+
+**H4:**
+**H5:**
 
 ### Key Insights
 
