@@ -39,14 +39,16 @@ st.markdown("""
 <style>
     /* ── typography ── */
     .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
+        font-size: 3.4rem;
+        font-weight: 800;
         color: #1f77b4;
         text-align: center;
-        margin-bottom: 0.25rem;
+        letter-spacing: -0.5px;
+        margin-bottom: 0.15rem;
+        line-height: 1.15;
     }
     .section-header {
-        font-size: 1.5rem;
+        font-size: 1.65rem;
         font-weight: bold;
         color: #2c3e50;
         border-bottom: 2px solid #3498db;
@@ -544,9 +546,9 @@ def main():
     # Header
     st.markdown('<p class="main-header">🌾 Food Price Inflation Analysis</p>', unsafe_allow_html=True)
     st.markdown("""
-    <p style="text-align: center; color: gray;">
+    <p style="text-align: center; color: gray; font-size: 1.05rem; margin-top: 0;">
     Exploring global food price trends and predicting inflation patterns<br>
-    <small>Team: Sergio, Gia & Florence | Code Institute Hackathon</small>
+    <small>Team: Sergio, Gia &amp; Florence &nbsp;|&nbsp; Code Institute Hackathon</small>
     </p>
     """, unsafe_allow_html=True)
     
