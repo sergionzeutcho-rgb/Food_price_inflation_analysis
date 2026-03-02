@@ -185,7 +185,7 @@ def create_country_comparison(df, metric='inflation'):
         title = "Average Price Index by Country"
         xaxis_title = "Average Price Index"
     
-    colors = ['coral' if x > 0 else 'steelblue' for x in country_stats]
+    colors = [COLOR_HIGH if x > 0 else COLOR_BLUE for x in country_stats]
     
     fig = go.Figure(go.Bar(
         x=country_stats.values,
@@ -217,7 +217,7 @@ def create_seasonal_chart(df):
     fig = go.Figure(go.Bar(
         x=months,
         y=monthly_avg.values,
-        marker_color=['coral' if x > monthly_avg.mean() else 'steelblue' for x in monthly_avg]
+        marker_color=[COLOR_HIGH if x > monthly_avg.mean() else COLOR_BLUE for x in monthly_avg]
     ))
     
     fig.add_hline(y=monthly_avg.mean(), line_dash="dash", line_color="black",
@@ -1546,6 +1546,15 @@ df['quarter'] = df['date'].dt.quarter
         st.markdown('<p class="main-header">🔮 Inflation Prediction Tool</p>', unsafe_allow_html=True)
         
         st.markdown("""
+        <div class="takeaway-box">
+        💡 <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
+        with one click (data auto-filled), or <strong>Custom Prediction</strong> to tweak every
+        input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
+        historical chart with your forecast plotted.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
         Use this interactive tool to predict food price inflation based on various input parameters. 
         The machine learning model uses historical patterns and country-specific features to generate 
         predictions. Choose between **Quick Prediction** using auto-filled historical data or 
@@ -1589,38 +1598,37 @@ df['quarter'] = df['date'].dt.quarter
                 st.markdown("**⚡ Preset Scenarios** — click one to auto-fill the fields below")
                 pre_col1, pre_col2, pre_col3, pre_col4 = st.columns(4)
                 
-                preset_choice = None
+                # --- preset buttons write directly to session_state then rerun ---
+                available_countries = sorted(df['country'].unique().tolist())
+                
+                def _apply_preset(country, year, month):
+                    if country in available_countries:
+                        st.session_state["quick_country"] = country
+                    st.session_state["quick_year"]    = year
+                    st.session_state["quick_month"]   = month
+                
                 with pre_col1:
                     if st.button("🌿 Kenya 2026", key="preset_kenya", use_container_width=True,
                                  help="High-volatility East African market"):
-                        preset_choice = {"country": "Kenya", "year": 2026, "month": 6}
+                        _apply_preset("Kenya", 2026, 6)
+                        st.rerun()
                 with pre_col2:
                     if st.button("🇧🇷 Brazil 2026", key="preset_brazil", use_container_width=True,
                                  help="Large emerging-market economy"):
-                        preset_choice = {"country": "Brazil", "year": 2026, "month": 6}
+                        _apply_preset("Brazil", 2026, 6)
+                        st.rerun()
                 with pre_col3:
                     if st.button("🇮🇳 India 2026", key="preset_india", use_container_width=True,
                                  help="Populous country with seasonal agriculture"):
-                        preset_choice = {"country": "India", "year": 2026, "month": 6}
+                        _apply_preset("India", 2026, 6)
+                        st.rerun()
                 with pre_col4:
                     if st.button("🌍 Nigeria 2026", key="preset_nigeria", use_container_width=True,
                                  help="Largest African economy"):
-                        preset_choice = {"country": "Nigeria", "year": 2026, "month": 6}
+                        _apply_preset("Nigeria", 2026, 6)
+                        st.rerun()
                 
                 st.markdown("---")
-                
-                # Determine defaults (from preset or widget)
-                available_countries = sorted(df['country'].unique().tolist())
-                default_country_idx = 0
-                default_year_idx    = 2
-                default_month_idx   = 0
-                
-                if preset_choice:
-                    c = preset_choice["country"]
-                    if c in available_countries:
-                        default_country_idx = available_countries.index(c)
-                    default_year_idx  = [2024,2025,2026,2027,2028].index(preset_choice["year"])
-                    default_month_idx = preset_choice["month"] - 1
                 
                 quick_col1, quick_col2, quick_col3 = st.columns(3)
                 
@@ -1628,7 +1636,6 @@ df['quarter'] = df['date'].dt.quarter
                     quick_country = st.selectbox(
                         "🌍 Select Country",
                         available_countries,
-                        index=default_country_idx,
                         key="quick_country"
                     )
                 
@@ -1636,7 +1643,7 @@ df['quarter'] = df['date'].dt.quarter
                     quick_year = st.selectbox(
                         "📅 Target Year",
                         options=[2024, 2025, 2026, 2027, 2028],
-                        index=default_year_idx,
+                        index=2,
                         key="quick_year"
                     )
                 
@@ -1644,7 +1651,6 @@ df['quarter'] = df['date'].dt.quarter
                     quick_month = st.selectbox(
                         "📆 Target Month",
                         options=list(range(1, 13)),
-                        index=default_month_idx,
                         format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
                                               'July', 'August', 'September', 'October', 'November', 'December'][x-1],
                         key="quick_month"
@@ -2003,10 +2009,10 @@ df['quarter'] = df['date'].dt.quarter
                                 'inflation_lag_6': custom_lag6,
                                 'inflation_lag_12': custom_lag12,
                                 'price_lag_1': custom_close,
-                                'price_ma_3': custom_price_ma3 if 'custom_price_ma3' in dir() else custom_close,
-                                'price_ma_6': custom_price_ma6 if 'custom_price_ma6' in dir() else custom_close,
-                                'price_ma_12': custom_price_ma12 if 'custom_price_ma12' in dir() else custom_close,
-                                'inflation_ma_3': custom_inf_ma3 if 'custom_inf_ma3' in dir() else custom_lag3,
+                                'price_ma_3': st.session_state.get("custom_price_ma3", custom_close),
+                                'price_ma_6': st.session_state.get("custom_price_ma6", custom_close),
+                                'price_ma_12': st.session_state.get("custom_price_ma12", custom_close),
+                                'inflation_ma_3': st.session_state.get("custom_inf_ma3", custom_lag3),
                                 'inflation_ma_6': custom_lag6,
                             }
                             
@@ -2154,6 +2160,16 @@ df['quarter'] = df['date'].dt.quarter
         
         st.dataframe(country_stats.sort_values('Avg Inflation', ascending=False), 
                      use_container_width=True)
+        
+        st.markdown("""
+        <div class="recommendation-box">
+        🧠 <strong>What does this mean for you?</strong><br>
+        Countries with <em>high average inflation and high standard deviation</em> are the most
+        unpredictable markets — prices can swing sharply. Buyers sourcing from those countries should
+        build in cost buffers or use fixed-price contracts. Countries with <em>low Infl Std</em> offer
+        more stable purchasing conditions even if the average inflation is moderate.
+        </div>
+        """, unsafe_allow_html=True)
         
         # Data Export Section
         st.markdown('<p class="section-header">📥 Data Export</p>', unsafe_allow_html=True)
