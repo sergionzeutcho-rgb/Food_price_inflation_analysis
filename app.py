@@ -1645,16 +1645,13 @@ df['quarter'] = df['date'].dt.quarter
                     quick_country = st.selectbox(
                         "🌍 Select Country",
                         available_countries,
-                        index=available_countries.index(st.session_state["quick_country"]),
                         key="quick_country"
                     )
                 
                 with quick_col2:
-                    _year_opts = [2024, 2025, 2026, 2027, 2028]
                     quick_year = st.selectbox(
                         "📅 Target Year",
-                        options=_year_opts,
-                        index=_year_opts.index(st.session_state["quick_year"]) if st.session_state["quick_year"] in _year_opts else 2,
+                        options=[2024, 2025, 2026, 2027, 2028],
                         key="quick_year"
                     )
                 
@@ -1662,7 +1659,6 @@ df['quarter'] = df['date'].dt.quarter
                     quick_month = st.selectbox(
                         "📆 Target Month",
                         options=list(range(1, 13)),
-                        index=int(st.session_state["quick_month"]) - 1,
                         format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
                                               'July', 'August', 'September', 'October', 'November', 'December'][x-1],
                         key="quick_month"
