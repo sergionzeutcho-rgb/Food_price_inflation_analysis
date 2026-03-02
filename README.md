@@ -2,6 +2,18 @@
 
 # Food Price Inflation Analysis
 
+## Team Members
+
+This project was developed as part of a Code Institute Hackathon by:
+
+| Name | Role |
+|------|------|
+| **Sergio** | Data Analysis & Machine Learning |
+| **Gia** | Data Cleaning & Visualisation |
+| **Florence** | Hypothesis Testing & Documentation |
+
+---
+
 ## Project Overview
 
 This project analyses global food price inflation trends using the World Real-Time Food Prices (RTFP) dataset. The analysis aims to understand how food prices have evolved across different countries over time, identify patterns in inflation, and provide actionable insights for stakeholders.
@@ -112,12 +124,15 @@ Food_price_inflation_analysis/
 ├── jupyter_notebooks/
 │   ├── Data_Cleaning.ipynb          # ETL and data preprocessing
 │   ├── Data_Analysis.ipynb          # Statistical analysis
-│   └── Hypothesis_Testing.ipynb     # Statistical tests and insights
+│   ├── Hypothesis_Testing.ipynb     # Statistical tests and insights
+│   └── ML_Predictions.ipynb         # Machine learning models
 │
 ├── outputs/
 │   ├── figures/                      # Generated visualisations
-│   └── reports/                      # Analysis reports
+│   ├── models/                       # Trained ML models (.joblib)
+│   └── reports/                      # Analysis reports (CSV)
 │
+├── app.py                            # Streamlit dashboard
 ├── .gitignore
 ├── Procfile
 ├── README.md
@@ -191,11 +206,21 @@ Visualisations are created using:
 
 ## Key Findings
 
-*To be updated upon completion of analysis*
+### Statistical Test Results
 
-1. **Finding 1**: Description of key insight
-2. **Finding 2**: Description of key insight
-3. **Finding 3**: Description of key insight
+| Hypothesis | Test Used | p-value | Result |
+|------------|-----------|---------|--------|
+| **H1:** Countries have different inflation rates | Kruskal-Wallis | < 0.05 | ✅ Significant |
+| **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
+| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
+| **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
+
+### Key Insights
+
+1. **Regional Disparities**: Food price inflation varies significantly across countries, indicating that local factors (supply chains, policies, climate) play a crucial role
+2. **Volatility-Inflation Link**: Higher price volatility is associated with higher inflation rates, suggesting that price stabilisation policies could help control inflation
+3. **Long-term Upward Trend**: Food prices have significantly increased from 2007 to 2023, raising concerns about food affordability globally
+4. **Predictive Potential**: Machine learning models can forecast inflation trends with reasonable accuracy, enabling proactive policy responses
 
 ---
 
@@ -272,11 +297,13 @@ Visualisations are created using:
 
 ## Future Improvements
 
-1. **Predictive Modelling**: Implement forecasting models
-2. **Additional Data Sources**: Integrate macroeconomic indicators
-3. **Real-time Updates**: Automate data refresh pipeline
-4. **API Development**: Create data access endpoints
-5. **Extended Geographic Coverage**: Include more countries
+1. **Enhanced Predictive Models**: Incorporate ARIMA/SARIMA for better time series forecasting
+2. **Additional Data Sources**: Integrate macroeconomic indicators (GDP, exchange rates, oil prices)
+3. **Real-time Updates**: Automate data refresh pipeline with scheduled API calls
+4. **API Development**: Create REST API endpoints for data access
+5. **Extended Geographic Coverage**: Include more countries and regional breakdowns
+6. **Deep Learning Models**: Implement LSTM networks for sequential pattern recognition
+7. **Anomaly Detection**: Add alerts for unusual price movements
 
 ---
 
@@ -307,9 +334,20 @@ Visualisations are created using:
 
 ---
 
+## Live Dashboard
+
+Explore the interactive Streamlit dashboard to visualise trends and predictions:
+- **Local**: Run `streamlit run app.py` after setup
+- **Deployed**: [Link to deployed app on Heroku/Streamlit Cloud]
+
+---
+
 ## Contact
 
 For questions or collaboration opportunities, please reach out through GitHub issues.
+
+**Team**: Sergio, Gia & Florence  
+**Hackathon**: Code Institute Data Analytics
 
 ---
 
