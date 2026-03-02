@@ -578,12 +578,11 @@ def main():
     st.sidebar.image("https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png", width=200)
     st.sidebar.title("Dashboard Controls")
     
-    # Sidebar navigation (synced with header)
+    # Sidebar navigation (synced with header via index, no key so stale state can't override)
     sidebar_page = st.sidebar.radio(
         "Navigate to:",
         nav_pages,
-        index=nav_pages.index(page),
-        key="sidebar_nav"
+        index=nav_pages.index(page)
     )
     
     # Sync sidebar selection with session state
