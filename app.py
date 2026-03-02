@@ -1547,8 +1547,8 @@ df['quarter'] = df['date'].dt.quarter
         st.markdown("""
         <div class="takeaway-box">
         💡 <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
-        with one click (data auto-filled), or <strong>Custom Prediction</strong> to tweak every
-        input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
+        with one click (data auto-filled from history), or <strong>Custom Prediction</strong> to tweak
+        every input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
         historical chart with your forecast plotted.
         </div>
         """, unsafe_allow_html=True)
@@ -1593,51 +1593,7 @@ df['quarter'] = df['date'].dt.quarter
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # ----- Preset Scenarios -----
-                st.markdown("**⚡ Preset Scenarios** — click one to auto-fill the fields below")
-                pre_col1, pre_col2, pre_col3, pre_col4 = st.columns(4)
-                
                 available_countries = sorted(df['country'].unique().tolist())
-                
-                # Preset buttons store a request in a neutral key — no widget keys touched here
-                with pre_col1:
-                    if st.button("🌿 Kenya 2026", key="preset_kenya", use_container_width=True,
-                                 help="High-volatility East African market"):
-                        st.session_state["_quick_preset"] = {"country": "Kenya", "year": 2026, "month": 6}
-                        st.rerun()
-                with pre_col2:
-                    if st.button("🌎 Brazil 2026", key="preset_brazil", use_container_width=True,
-                                 help="Large emerging-market economy"):
-                        st.session_state["_quick_preset"] = {"country": "Brazil", "year": 2026, "month": 6}
-                        st.rerun()
-                with pre_col3:
-                    if st.button("🌏 India 2026", key="preset_india", use_container_width=True,
-                                 help="Populous country with seasonal agriculture"):
-                        st.session_state["_quick_preset"] = {"country": "India", "year": 2026, "month": 6}
-                        st.rerun()
-                with pre_col4:
-                    if st.button("🌍 Nigeria 2026", key="preset_nigeria", use_container_width=True,
-                                 help="Largest African economy"):
-                        st.session_state["_quick_preset"] = {"country": "Nigeria", "year": 2026, "month": 6}
-                        st.rerun()
-                
-                st.markdown("---")
-                
-                # Apply preset BEFORE widgets render — pop so it fires only once
-                _preset = st.session_state.pop("_quick_preset", None)
-                if _preset:
-                    if _preset["country"] in available_countries:
-                        st.session_state["quick_country"] = _preset["country"]
-                    st.session_state["quick_year"]  = _preset["year"]
-                    st.session_state["quick_month"] = _preset["month"]
-                
-                # Initialise defaults on first visit
-                if "quick_country" not in st.session_state:
-                    st.session_state["quick_country"] = available_countries[0]
-                if "quick_year" not in st.session_state:
-                    st.session_state["quick_year"] = 2026
-                if "quick_month" not in st.session_state:
-                    st.session_state["quick_month"] = 1
                 
                 quick_col1, quick_col2, quick_col3 = st.columns(3)
                 
