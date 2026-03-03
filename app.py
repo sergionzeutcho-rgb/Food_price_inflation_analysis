@@ -1320,32 +1320,31 @@ df['quarter'] = df['date'].dt.quarter
             h3_result = 'SIGNIFICANT' if h3_p < 0.05 else 'NOT SIGNIFICANT'
             
             if h3_p < 0.05:
-                h3_text = """
-                Our analysis provides evidence for seasonal patterns in food price inflation. Certain months 
-                consistently show higher average inflation rates than others, suggesting that agricultural 
+                st.markdown(f"""
+                <div class="outcome-box">
+                <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
+                Our analysis provides evidence for seasonal patterns in food price inflation. Certain months
+                consistently show higher average inflation rates than others, suggesting that agricultural
                 production cycles and seasonal demand fluctuations do influence price dynamics.
-                
-                <strong>Practical Implication:</strong> Understanding these patterns enables better planning. 
-                Consumers might time major food purchases to avoid high-inflation periods. Food assistance 
+                <br><br>
+                <strong>Practical Implication:</strong> Understanding these patterns enables better planning.
+                Consumers might time major food purchases to avoid high-inflation periods. Food assistance
                 programs might increase support during months when prices typically spike.
-                """
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                h3_text = """
-                At the global level, no statistically significant seasonal pattern was detected. Monthly 
-                inflation distributions are broadly similar, meaning there is no single month that 
+                st.markdown(f"""
+                <div class="outcome-box">
+                <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
+                At the global level, no statistically significant seasonal pattern was detected. Monthly
+                inflation distributions are broadly similar, meaning there is no single month that
                 consistently drives higher or lower inflation across all countries.
-                
-                <strong>Practical Implication:</strong> While global seasonality is weak, individual 
-                countries may still exhibit local seasonal effects driven by their own agricultural 
+                <br><br>
+                <strong>Practical Implication:</strong> While global seasonality is weak, individual
+                countries may still exhibit local seasonal effects driven by their own agricultural
                 calendars. Country-level analysis is recommended before drawing planning conclusions.
-                """
-
-            st.markdown(f"""
-            <div class="outcome-box">
-            <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
-            {h3_text}
-            </div>
-            """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
             
             # H3 Chart
             fig_h3 = create_seasonal_boxplot(df_filtered)
