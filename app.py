@@ -2301,19 +2301,23 @@ df['quarter'] = df['date'].dt.quarter
         with col2:
             st.markdown("""
             **Gia**
-            *Streamlit Dashboard & Project Board*
+            *Streamlit Dashboard, Hypothesis Testing & Project Board*
 
-            Managed the project board and contributed to the interactive Streamlit dashboard development.
-            Ensured project coordination and delivery.
+            Managed the project board and contributed to the
+            interactive Streamlit dashboard development. Supported
+            hypothesis testing and ensured project coordination
+            and delivery.
             """)
 
         with col3:
             st.markdown("""
             **Sergio**
-            *Streamlit Dashboard & Machine Learning*
+            *Streamlit Dashboard, Machine Learning & Hypothesis Testing*
 
-            Led the development of machine learning models and the interactive Streamlit dashboard.
-            Responsible for feature engineering and model evaluation.
+            Led the development of machine learning models and
+            the interactive Streamlit dashboard. Responsible for
+            feature engineering, model evaluation, and hypothesis
+            testing.
             """)
         
         st.markdown('<p class="section-header">Methodology Summary</p>', unsafe_allow_html=True)
