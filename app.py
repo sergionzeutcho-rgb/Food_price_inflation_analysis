@@ -37,70 +37,122 @@ RISK_HIGH_THRESHOLD = 10   # inflation %
 # ─── Custom CSS ──────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* ── typography ── */
-    .main-header {
-        font-size: 3.4rem;
-        font-weight: 800;
-        color: #1f77b4;
+    /* ── hero banner ── */
+    .hero-banner {
+        background: linear-gradient(135deg, #0f2c55 0%, #1a5276 50%, #1f77b4 100%);
+        border-radius: 16px;
+        padding: 2.6rem 2rem 2rem 2rem;
         text-align: center;
-        letter-spacing: -0.5px;
-        margin-bottom: 0.15rem;
-        line-height: 1.15;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 6px 32px rgba(31,119,180,0.25);
+        position: relative;
+        overflow: hidden;
     }
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 220px; height: 220px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 50%;
+    }
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: -30px;
+        width: 280px; height: 280px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 50%;
+    }
+    .hero-title {
+        font-size: 3.8rem;
+        font-weight: 900;
+        color: #ffffff;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        margin: 0 0 0.5rem 0;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .hero-emoji {
+        font-size: 3.2rem;
+        display: block;
+        margin-bottom: 0.4rem;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    }
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.85);
+        margin: 0 0 0.25rem 0;
+        font-weight: 400;
+    }
+    .hero-team {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.6);
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+    /* ── section header ── */
     .section-header {
         font-size: 1.65rem;
-        font-weight: bold;
-        color: #2c3e50;
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 0.5rem;
+        font-weight: 700;
+        color: #1a3a5c;
+        border-bottom: 3px solid #1f77b4;
+        padding-bottom: 0.45rem;
         margin-top: 2rem;
+        letter-spacing: -0.3px;
     }
     /* ── coloured callout boxes ── */
     .explanation-box {
-        background-color: #e8f4f8;
-        border-left: 4px solid #3498db;
-        padding: 1rem;
+        background-color: #e8f4fb;
+        border-left: 5px solid #2980b9;
+        padding: 1rem 1.1rem;
         margin: 1rem 0;
-        border-radius: 0 5px 5px 0;
+        border-radius: 0 8px 8px 0;
         color: #1a1a2e;
+        box-shadow: 0 1px 4px rgba(41,128,185,0.08);
     }
     .outcome-box {
-        background-color: #e8f8e8;
-        border-left: 4px solid #27ae60;
-        padding: 1rem;
+        background-color: #e9f7ef;
+        border-left: 5px solid #27ae60;
+        padding: 1rem 1.1rem;
         margin: 1rem 0;
-        border-radius: 0 5px 5px 0;
+        border-radius: 0 8px 8px 0;
         color: #1a1a2e;
+        box-shadow: 0 1px 4px rgba(39,174,96,0.08);
     }
     .recommendation-box {
-        background-color: #fff8e8;
-        border-left: 4px solid #f39c12;
-        padding: 1rem;
+        background-color: #fef9e7;
+        border-left: 5px solid #f39c12;
+        padding: 1rem 1.1rem;
         margin: 1rem 0;
-        border-radius: 0 5px 5px 0;
+        border-radius: 0 8px 8px 0;
         color: #1a1a2e;
+        box-shadow: 0 1px 4px rgba(243,156,18,0.08);
     }
     /* TL;DR / key-takeaway strip */
     .takeaway-box {
-        background: linear-gradient(135deg, #e8e4f8 0%, #f0e8f8 100%);
-        border: 1px solid #667eea55;
+        background: linear-gradient(135deg, #eae6f8 0%, #f3e8fa 100%);
+        border: 1px solid #667eea44;
         border-left: 5px solid #667eea;
-        padding: 0.85rem 1.1rem;
+        padding: 0.9rem 1.2rem;
         margin: 0.5rem 0 1.5rem 0;
-        border-radius: 0 8px 8px 0;
+        border-radius: 0 10px 10px 0;
         font-size: 0.97rem;
         color: #1a1a2e;
+        box-shadow: 0 1px 6px rgba(102,126,234,0.1);
     }
     /* Risk colour badges */
-    .badge-low  { background:#27ae60; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
-    .badge-med  { background:#f39c12; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
-    .badge-high { background:#e74c3c; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
+    .badge-low  { background:#27ae60; color:#fff; padding:3px 11px; border-radius:14px; font-weight:700; font-size:0.88rem; }
+    .badge-med  { background:#f39c12; color:#fff; padding:3px 11px; border-radius:14px; font-weight:700; font-size:0.88rem; }
+    .badge-high { background:#e74c3c; color:#fff; padding:3px 11px; border-radius:14px; font-weight:700; font-size:0.88rem; }
     /* metric card */
     .metric-card {
-        background-color: #f0f2f6;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #f5f7ff 0%, #eef1f8 100%);
+        border-radius: 12px;
         padding: 1rem;
         text-align: center;
+        border: 1px solid #e0e6f0;
+        box-shadow: 0 2px 8px rgba(31,119,180,0.07);
     }
     /* ── navigation buttons: compact, 2-row on narrow screens ── */
     div[data-testid="column"] button {
@@ -547,13 +599,14 @@ def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "Overview"
     
-    # Header
-    st.markdown('<p class="main-header">Food Price Inflation Analysis</p>', unsafe_allow_html=True)
+    # Header — hero banner
     st.markdown("""
-    <p style="text-align: center; color: gray; font-size: 1.05rem; margin-top: 0;">
-    Exploring global food price trends and predicting inflation patterns<br>
-    <small>Team: Florence, Gia &amp; Sergio &nbsp;|&nbsp; Code Institute Hackathon</small>
-    </p>
+    <div class="hero-banner">
+        <span class="hero-emoji">🌾</span>
+        <p class="hero-title">Food Price Inflation Analysis</p>
+        <p class="hero-subtitle">Exploring global food price trends and predicting inflation patterns</p>
+        <p class="hero-team">Florence &nbsp;&bull;&nbsp; Gia &nbsp;&bull;&nbsp; Sergio &nbsp;&nbsp;|&nbsp;&nbsp; Code Institute Hackathon</p>
+    </div>
     """, unsafe_allow_html=True)
     
     # Navigation Bar in Header (visible on all pages)
@@ -1588,7 +1641,7 @@ df['quarter'] = df['date'].dt.quarter
     
     # ============= PAGE: PREDICTION TOOL =============
     elif page == "Prediction Tool":
-        st.markdown('<p class="main-header">Inflation Prediction Tool</p>', unsafe_allow_html=True)
+        st.markdown('<p class="section-header">🔮 Inflation Prediction Tool</p>', unsafe_allow_html=True)
         
         st.markdown("""
         <div class="takeaway-box">
