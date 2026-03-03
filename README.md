@@ -217,7 +217,7 @@ Visualisations are created using:
 | **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
 | **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
 | **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
- **H5:**
+| **H5:**  Time-series models can reasonably forecast short-term food price trends|An ARIMA(1,1,1) model   |RMSE = 10.29 | MAE = 8.93 | ✅ Partially Supported |
 
 ### Key Insights
 
@@ -225,7 +225,7 @@ Visualisations are created using:
 2. **Volatility-Inflation Link**: Higher price volatility is associated with higher inflation rates, suggesting that price stabilisation policies could help control inflation
 3. **Long-term Upward Trend**: Food prices have significantly increased from 2007 to 2023, raising concerns about food affordability globally
 4. **Predictive Potential**: Machine learning models can forecast inflation trends with reasonable accuracy, enabling proactive policy responses
-
+5. ** An ARIMA(1,1,1) modelThe model captures time dependency and general trend direction, but forecasting accuracy is moderate due to structural volatility and post-2020 inflation shocks.
 ---
 
 ## Ethical Considerations
