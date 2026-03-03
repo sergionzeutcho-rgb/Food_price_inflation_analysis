@@ -2,4 +2,5 @@ ID,Question,Test,p-value,Significant
 H1,Regional Differences,Kruskal-Wallis,3.23e-138,✅ YES
 H2,Volatility-Inflation,Spearman,8.01e-81,✅ YES
 H3,Seasonal Patterns,Kruskal-Wallis,1.00e+00,❌ NO
-H4,Price Trend,Mann-Whitney U,nan,❌ NO
+H4,Price Trend,Mann-Whitney U,0.00e+00,✅ YES
+H5,Inflation Forecast,"ARIMA(1,1,1)",RMSE=10.29,⚠️ PARTIAL

@@ -284,7 +284,7 @@ A standalone interactive report built in Power BI Desktop, designed for business
 |------------|-----------|---------|--------|
 | **H1:** Countries have different inflation rates | Kruskal-Wallis | < 0.05 | ✅ Significant |
 | **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
-| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
+| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | 1.00 | ❌ Not Significant |
 | **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
 | **H5:** Time-series models can forecast short-term trends | ARIMA(1,1,1) | RMSE = 10.29, MAE = 8.93 | ✅ Partially Supported |
 
