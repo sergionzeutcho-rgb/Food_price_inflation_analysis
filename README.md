@@ -263,7 +263,7 @@ An interactive Python-powered web app with 8 pages, deployed via Heroku.
 | Country Explorer | Per-country stats, trend chart, and CSV export |
 | About | Team cards, CRISP-DM methodology, data sources |
 
-**Key features:** sidebar filters (country, year), TL;DR insight boxes, "What does this mean?" interpretation panels, risk badges (Low / Medium / High), and 24-month historical charts with forecast overlay.
+**Key features:** sidebar filters (country, year), Key Takeaway insight boxes, "What does this mean?" interpretation panels, risk badges (Low / Medium / High), and 24-month historical charts with forecast overlay.
 
 ### 📊 Power BI Dashboard (`Power Bi/Food Price Inflation Analysis.pbix`)
 A standalone interactive report built in Power BI Desktop, designed for business stakeholders.
@@ -291,27 +291,27 @@ A standalone interactive report built in Power BI Desktop, designed for business
 #### Hypothesis Test Visualisations
 
 <p align="center">
-  <img src="outputs/figures/h1_regional_inflation.png" alt="H1 – Regional Inflation" width="700"/>
-  <br><em>H1: Regional inflation distribution — significant differences across countries</em>
+  <img src="outputs/figures/h1_regional_inflation.png" alt="H1: Regional Inflation" width="700"/>
+  <br><em>H1: Regional inflation distribution, showing significant differences across countries</em>
 </p>
 
 <p align="center">
-  <img src="outputs/figures/h2_volatility_inflation.png" alt="H2 – Volatility vs Inflation" width="700"/>
+  <img src="outputs/figures/h2_volatility_inflation.png" alt="H2: Volatility vs Inflation" width="700"/>
   <br><em>H2: Price volatility (High−Low range) vs inflation rate</em>
 </p>
 
 <p align="center">
-  <img src="outputs/figures/h3_seasonal_inflation.png" alt="H3 – Seasonal Inflation" width="700"/>
+  <img src="outputs/figures/h3_seasonal_inflation.png" alt="H3: Seasonal Inflation" width="700"/>
   <br><em>H3: Seasonal patterns in food price inflation</em>
 </p>
 
 <p align="center">
-  <img src="outputs/figures/h4_price_trend.png" alt="H4 – Long-term Price Trend" width="700"/>
+  <img src="outputs/figures/h4_price_trend.png" alt="H4: Long-term Price Trend" width="700"/>
   <br><em>H4: Long-term upward trend in food prices (2007–2023)</em>
 </p>
 
 <p align="center">
-  <img src="outputs/figures/h5_arima_forecast.png" alt="H5 – ARIMA Forecast" width="700"/>
+  <img src="outputs/figures/h5_arima_forecast.png" alt="H5: ARIMA Forecast" width="700"/>
   <br><em>H5: ARIMA(1,1,1) forecast vs actual inflation on 12-month holdout</em>
 </p>
 
@@ -327,7 +327,7 @@ A standalone interactive report built in Power BI Desktop, designed for business
 
 <p align="center">
   <img src="outputs/figures/ml_model_comparison.png" alt="ML Model Comparison" width="700"/>
-  <br><em>Model performance comparison — R² scores across candidate algorithms</em>
+  <br><em>Model performance comparison: R² scores across candidate algorithms</em>
 </p>
 
 <p align="center">
@@ -337,7 +337,7 @@ A standalone interactive report built in Power BI Desktop, designed for business
 
 <p align="center">
   <img src="outputs/figures/actual_vs_predicted.png" alt="Actual vs Predicted" width="700"/>
-  <br><em>Actual vs predicted inflation — model validation</em>
+  <br><em>Actual vs predicted inflation: model validation</em>
 </p>
 
 ---

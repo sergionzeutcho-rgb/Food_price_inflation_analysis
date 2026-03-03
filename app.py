@@ -129,7 +129,7 @@ st.markdown("""
         color: #1a1a2e;
         box-shadow: 0 1px 4px rgba(243,156,18,0.08);
     }
-    /* TL;DR / key-takeaway strip */
+    /* Key-takeaway strip */
     .takeaway-box {
         background: linear-gradient(135deg, #eae6f8 0%, #f3e8fa 100%);
         border: 1px solid #667eea44;
@@ -599,7 +599,7 @@ def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "Overview"
     
-    # Header — hero banner
+    # Header: hero banner
     st.markdown("""
     <div class="hero-banner">
         <span class="hero-emoji">🌾</span>
@@ -622,8 +622,6 @@ def main():
                         type="primary" if st.session_state.current_page == nav_page else "secondary"):
                 st.session_state.current_page = nav_page
                 st.rerun()
-    
-    st.markdown("---")
     
     # Load data
     df = load_data()
@@ -700,11 +698,11 @@ def main():
     if page == "Overview":
         st.markdown('<p class="section-header">Project Overview</p>', unsafe_allow_html=True)
         
-        # TL;DR key takeaway
+        # Key takeaway
         avg_inf_all = df['inflation'].mean()
         st.markdown(f"""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Over 16 years (2007–2023) food prices rose significantly across 
+        <strong>Key Takeaway:</strong> Over 16 years (2007–2023) food prices rose significantly across 
         25 countries. Average global inflation stood at <strong>{avg_inf_all:.1f}%</strong> per year, 
         with large regional differences. Scroll down or use a page in the navigation bar to dive deeper.
         </div>
@@ -724,14 +722,14 @@ def main():
             | 5 | Visit **Country Explorer** to download filtered data as CSV |
 
             **Page Guide**
-            - **Overview** — big-picture summary and key metrics
-            - **Data Cleaning** — how the raw dataset was prepared
-            - **Data Analysis** — distributions, correlations and seasonal patterns
-            - **Hypothesis Testing** — statistically validated findings
-            - **ML Predictions** — model training, comparison and feature importance
-            - **Prediction Tool** — interactive inflation forecaster
-            - **Country Explorer** — per-country deep-dive and data download
-            - **About** — team, methodology and data source
+            - **Overview**: big-picture summary and key metrics
+            - **Data Cleaning**: how the raw dataset was prepared
+            - **Data Analysis**: distributions, correlations and seasonal patterns
+            - **Hypothesis Testing**: statistically validated findings
+            - **ML Predictions**: model training, comparison and feature importance
+            - **Prediction Tool**: interactive inflation forecaster
+            - **Country Explorer**: per-country deep-dive and data download
+            - **About**: team, methodology and data source
             """)
         
         st.markdown("""
@@ -856,9 +854,9 @@ def main():
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
+        <strong>Key Takeaway:</strong> The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
         validated and enriched with 6 new features (volatility, price change, month, year…).
-        Missing inflation values (≈7.6%) were kept intentionally — they are structural gaps from the
+        Missing inflation values (≈7.6%) were kept intentionally because they are structural gaps from the
         year-over-year calculation, not errors.
         </div>
         """, unsafe_allow_html=True)
@@ -906,7 +904,7 @@ print(f"Countries in dataset: {df['country'].nunique()}")
         Missing values can significantly impact our analysis in several ways. Statistical calculations 
         like means and standard deviations can be biased if missing values are not handled properly. 
         Many machine learning algorithms cannot process datasets containing missing values at all. 
-        Additionally, patterns in missingness themselves can provide insights—for example, if inflation 
+        Additionally, patterns in missingness themselves can provide insights. For example, if inflation 
         data is missing for certain periods, this might indicate data collection challenges during 
         those times.
         
@@ -987,15 +985,15 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Food prices are right-skewed and have risen steadily since 2007.
+        <strong>Key Takeaway:</strong> Food prices are right-skewed and have risen steadily since 2007.
         Country-level inflation ranges from near 0% to over 20%. Price volatility and inflation are
-        positively correlated, and mild seasonal patterns exist — use the sidebar to filter by country.
+        positively correlated, and mild seasonal patterns exist. Use the sidebar to filter by country.
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         Exploratory Data Analysis (EDA) is the detective work of data science. Before we can draw 
-        conclusions or build predictive models, we need to deeply understand our data—its distributions, 
+        conclusions or build predictive models, we need to deeply understand our data, including its distributions, 
         patterns, relationships, and anomalies. This systematic exploration guides our subsequent 
         hypothesis testing and modeling decisions.
         """)
@@ -1006,7 +1004,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="explanation-box">
         <strong>Why We Analyse Distributions:</strong><br><br>
         Understanding the distribution of our variables is essential for several reasons. First, it 
-        helps us choose appropriate statistical tests—many common tests assume normally distributed 
+        helps us choose appropriate statistical tests. Many common tests assume normally distributed 
         data, so we need to verify this assumption or select non-parametric alternatives. Second, 
         distributions reveal outliers and extreme values that may require special handling or 
         investigation. Third, skewed distributions might benefit from transformation before modeling.
@@ -1073,7 +1071,7 @@ df['quarter'] = df['date'].dt.quarter
         Correlation analysis helps us understand how different variables move together. A positive 
         correlation means that when one variable increases, the other tends to increase as well. 
         A negative correlation indicates an inverse relationship. However, it is crucial to remember 
-        that correlation does not imply causation—two variables may be correlated because they share 
+        that correlation does not imply causation. Two variables may be correlated because they share 
         a common cause, or the relationship may be coincidental.
         
         Our correlation analysis revealed strong positive correlations among the price indices (Open, 
@@ -1100,8 +1098,8 @@ df['quarter'] = df['date'].dt.quarter
         <strong>What does this mean for you?</strong><br>
         The strong link between price <em>volatility</em> (High−Low range) and <em>inflation</em> is the
         key practical finding here. It means that when prices swing wildly within a single month,
-        overall price levels tend to be rising too. Smoothing-out those swings — through better
-        market information, storage infrastructure, or price floors/ceilings — could also help
+        overall price levels tend to be rising too. Smoothing-out those swings (through better
+        market information, storage infrastructure, or price floors/ceilings) could also help
         moderate inflation.
         </div>
         """, unsafe_allow_html=True)
@@ -1160,7 +1158,7 @@ df['quarter'] = df['date'].dt.quarter
         local policy choices and economic conditions significantly influence food price outcomes.
         
         The correlation between price volatility and inflation suggests that stabilising prices 
-        could help control inflation. This finding has important policy implications—interventions 
+        could help control inflation. This finding has important policy implications. Interventions 
         that reduce price volatility, such as strategic reserves, price supports, or improved 
         market information systems, might also help control inflation.
         </div>
@@ -1172,7 +1170,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Three hypotheses were <strong>statistically significant</strong>:
+        <strong>Key Takeaway:</strong> Three hypotheses were <strong>statistically significant</strong>:
         (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation;
         (H4) food prices have significantly increased over time.
         (H3) Seasonal patterns <strong>vary by analysis</strong>.
@@ -1195,7 +1193,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="explanation-box">
         <strong>What P-Values Tell Us:</strong><br><br>
         The p-value is the probability of observing results as extreme as ours if the null hypothesis 
-        were true—that is, if there were no real effect or difference. A small p-value (typically 
+        were true, that is, if there were no real effect or difference. A small p-value (typically 
         less than 0.05) suggests that our results are unlikely to have occurred by chance alone, 
         providing evidence against the null hypothesis.
         
@@ -1238,7 +1236,7 @@ df['quarter'] = df['date'].dt.quarter
             
             The Kruskal-Wallis test confirmed that inflation rates differ significantly across countries. 
             This means the substantial variation we observed during exploratory analysis is not due to 
-            random chance—there are real, systematic differences in how different countries experience 
+            random chance. There are real, systematic differences in how different countries experience 
             food price inflation.
             
             <strong>Practical Implication:</strong> Global solutions to food price inflation may not be 
@@ -1263,7 +1261,7 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Why We Used Spearman Correlation:</strong><br><br>
         We chose Spearman's rank correlation coefficient over Pearson's correlation because it does 
         not require the relationship between variables to be linear or the data to be normally 
-        distributed. Spearman's method measures monotonic relationships—whether one variable tends 
+        distributed. Spearman's method measures monotonic relationships, specifically whether one variable tends 
         to increase as the other increases, regardless of whether that relationship follows a 
         straight line.
         
@@ -1283,8 +1281,8 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Result: {h2_result} {direction.upper()} CORRELATION (r = {h2_corr:.4f}, p = {h2_p:.2e})</strong><br><br>
         
         Our analysis found a statistically significant {direction} relationship between price volatility 
-        and inflation rates. This means that periods and countries with more volatile prices—larger 
-        swings between high and low values—tend to also experience higher inflation.
+        and inflation rates. This means that periods and countries with more volatile prices (larger 
+        swings between high and low values) tend to also experience higher inflation.
         
         <strong>Practical Implication:</strong> Price stabilisation policies could have a dual benefit. 
         By reducing the gap between high and low prices, interventions might also help control 
@@ -1348,8 +1346,8 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Research Question:</strong> Have food prices significantly increased over time?<br><br>
         
         <strong>Why We Used the Mann-Whitney U Test:</strong><br><br>
-        To test for a long-term trend, we divided the dataset into two periods—the first half and 
-        the second half of the time series—and compared price distributions between them. The 
+        To test for a long-term trend, we divided the dataset into two periods (the first half and 
+        the second half of the time series) and compared price distributions between them. The 
         Mann-Whitney U test is ideal for comparing two independent groups when the data may not 
         be normally distributed.
         
@@ -1470,7 +1468,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Three models were trained: Linear Regression, Random Forest, and
+        <strong>Key Takeaway:</strong> Three models were trained: Linear Regression, Random Forest, and
         XGBoost. The best model explains the majority of inflation variance (R² on test data). The
         strongest predictor is <em>last month’s inflation</em>. Head to
         <strong>🔮 Prediction Tool</strong> to run live forecasts.
@@ -1511,7 +1509,7 @@ df['quarter'] = df['date'].dt.quarter
         To predict future inflation, we engineered several types of features from our historical data:
         
         <strong>Lag Features:</strong> We included previous months' inflation and price values as 
-        features. Inflation often shows persistence—high inflation this month tends to be followed 
+        features. Inflation often shows persistence: high inflation this month tends to be followed 
         by high inflation next month. By including lag values for 1, 3, 6, and 12 months, the model 
         can learn these temporal dependencies.
         
@@ -1592,7 +1590,7 @@ df['quarter'] = df['date'].dt.quarter
                 
                 <strong>Key Finding:</strong> The most important predictor of inflation is the previous 
                 month's inflation value, followed by other lag features. This strong autoregressive 
-                pattern makes intuitive sense—inflation tends to persist, and knowing recent inflation 
+                pattern makes intuitive sense: inflation tends to persist, and knowing recent inflation 
                 gives us substantial information about future inflation.
                 </div>
                 """, unsafe_allow_html=True)
@@ -1629,8 +1627,8 @@ df['quarter'] = df['date'].dt.quarter
         alter inflation dynamics in ways not captured by historical patterns.
         
         <strong>Structural Changes:</strong> The models assume that relationships between variables 
-        remain stable over time. If fundamental economic structures change—for example, due to 
-        major trade policy shifts or technological disruptions—historical patterns may no longer apply.
+        remain stable over time. If fundamental economic structures change (for example, due to 
+        major trade policy shifts or technological disruptions), historical patterns may no longer apply.
         
         <strong>Data Quality:</strong> Predictions are only as good as the input data. If there are 
         errors or gaps in the underlying data, these will propagate through to the predictions.
@@ -1647,7 +1645,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
+        <strong>Key Takeaway:</strong> Choose <strong>Quick Prediction</strong> to forecast any country
         with one click (data auto-filled from history), or <strong>Custom Prediction</strong> to tweak
         every input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
         historical chart with your forecast plotted.
@@ -1680,8 +1678,6 @@ df['quarter'] = df['date'].dt.quarter
                 horizontal=True,
                 help="Quick mode uses historical averages, Custom mode allows manual input"
             )
-            
-            st.markdown("---")
             
             if prediction_mode == "Quick Prediction":
                 st.markdown('<p class="section-header">Quick Prediction</p>', unsafe_allow_html=True)
@@ -1794,7 +1790,6 @@ df['quarter'] = df['date'].dt.quarter
                                 prediction = model.predict(input_scaled)[0]
                                 
                                 # Display results
-                                st.markdown("---")
                                 st.markdown('<p class="section-header">Prediction Results</p>', unsafe_allow_html=True)
                                 
                                 last_inf = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
@@ -1898,7 +1893,7 @@ df['quarter'] = df['date'].dt.quarter
                                     ))
                                     
                                     fig.update_layout(
-                                        title=f"Inflation Trend – {quick_country} (last 24 months + forecast)",
+                                        title=f"Inflation Trend: {quick_country} (last 24 months + forecast)",
                                         xaxis_title="Date",
                                         yaxis_title="Inflation (%)",
                                         height=420,
@@ -2103,7 +2098,6 @@ df['quarter'] = df['date'].dt.quarter
                             prediction = model.predict(input_scaled)[0]
                             
                             # Display results
-                            st.markdown("---")
                             st.markdown('<p class="section-header">Custom Prediction Results</p>', unsafe_allow_html=True)
                             
                             risk_label, risk_class = get_risk_label(prediction)
@@ -2160,9 +2154,9 @@ df['quarter'] = df['date'].dt.quarter
                             
                             st.markdown(f"""
                             <div class="outcome-box">
-                            <strong>{alert} — {custom_country}, {month_name} {custom_year}</strong><br><br>
-                            Predicted inflation: <strong>{prediction:.2f}%</strong> — 
-                            a {change_pp:.2f} pp {direction} vs the previous month ({custom_lag1:.2f}%). {advice}
+                            <strong>{alert}: {custom_country}, {month_name} {custom_year}</strong><br><br>
+                            Predicted inflation: <strong>{prediction:.2f}%</strong>.
+                            A {change_pp:.2f} pp {direction} vs the previous month ({custom_lag1:.2f}%). {advice}
                             <br><br>
                             <strong>Input Summary:</strong> Price Index {custom_close:.2f} · 
                             Volatility {custom_range:.4f} · Previous Inflation {custom_lag1:.2f}% · 
@@ -2175,7 +2169,6 @@ df['quarter'] = df['date'].dt.quarter
                             st.info("Please check your input values and try again.")
             
             # Disclaimer
-            st.markdown("---")
             st.markdown("""
             <div class="recommendation-box">
             <strong>⚠️ Important Disclaimer</strong><br><br>
@@ -2193,7 +2186,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Compare all countries side-by-side or drill into one using the
+        <strong>Key Takeaway:</strong> Compare all countries side-by-side or drill into one using the
         sidebar filter. The table below ranks every country by average inflation. Use the
         <strong>Download</strong> buttons to export the data you’re viewing.
         </div>
@@ -2230,7 +2223,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="recommendation-box">
         <strong>What does this mean for you?</strong><br>
         Countries with <em>high average inflation and high standard deviation</em> are the most
-        unpredictable markets — prices can swing sharply. Buyers sourcing from those countries should
+        unpredictable markets, as prices can swing sharply. Buyers sourcing from those countries should
         build in cost buffers or use fixed-price contracts. Countries with <em>low Infl Std</em> offer
         more stable purchasing conditions even if the average inflation is moderate.
         </div>
@@ -2275,7 +2268,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — This dashboard was built by a three-person team for the Code 
+        <strong>Key Takeaway:</strong> This dashboard was built by a three-person team for the Code 
         Institute Data Analytics Hackathon. It analyses global food price inflation across 25 countries 
         (2007–2023) using statistical testing and machine learning to forecast future inflation trends.
         </div>
@@ -2288,7 +2281,7 @@ df['quarter'] = df['date'].dt.quarter
         
         The World Bank's Real-Time Food Prices dataset provided rich historical data spanning 16 years 
         and 25 countries, enabling us to examine both temporal trends and geographic variations in food 
-        price dynamics. Our analysis pipeline—implemented across four Jupyter notebooks—follows industry 
+        price dynamics. Our analysis pipeline, implemented across four Jupyter notebooks, follows industry 
         best practices for reproducible data science.
         """)
         
@@ -2329,7 +2322,7 @@ df['quarter'] = df['date'].dt.quarter
         Our analysis followed the CRISP-DM (Cross-Industry Standard Process for Data Mining) methodology:
         
         **Business Understanding:** We identified the key questions about food price inflation that 
-        stakeholders need answered—how prices have changed, why they vary across regions, whether 
+        stakeholders need answered: how prices have changed, why they vary across regions, whether 
         patterns are predictable, and what drives inflation.
         
         **Data Understanding:** We explored the World Bank RTFP dataset, examining its structure, 
@@ -2372,7 +2365,6 @@ df['quarter'] = df['date'].dt.quarter
         except FileNotFoundError:
             st.info("Run the Hypothesis_Testing notebook to see detailed results here.")
         
-        st.markdown("---")
         st.markdown("""
         <p style="text-align: center; color: gray;">
         <small>Code Institute Data Analytics Hackathon | March 2026<br>
@@ -2381,7 +2373,6 @@ df['quarter'] = df['date'].dt.quarter
         """, unsafe_allow_html=True)
     
     # Footer
-    st.sidebar.markdown("---")
     st.sidebar.markdown("""
     <small>
     Data: World Bank RTFP<br>
