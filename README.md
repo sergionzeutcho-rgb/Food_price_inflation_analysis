@@ -9,8 +9,8 @@ This project was developed as part of a Code Institute Hackathon by:
 | Name | Role |
 |------|------|
 | **Florence** | Hypothesis Testing, Documentation & Power BI |
-| **Gia** | Streamlit Dashboard & Project Board |
-| **Sergio** | Streamlit Dashboard & Machine Learning |
+| **Gia** | Streamlit Dashboard, Hypothesis Testing & Project Board |
+| **Sergio** | Streamlit Dashboard, Machine Learning & Hypothesis Testing |
 
 ---
 
@@ -105,10 +105,15 @@ This project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mi
 ### Hypothesis Testing
 
 **H1**: Food price inflation varies significantly across different regions
+
 **H2**: Price volatility (High-Low range) correlates with inflation rates
+
 **H3**: There are seasonal patterns in food price movements
+
 **H4**: Food prices have increased significantly over time (2007-2023)
-**H5**: Machine learning models can reasonably forecast short-term inflation trends 
+
+**H5**: Machine learning models can reasonably forecast short-term inflation trends
+
 ---
 
 ## Project Structure
