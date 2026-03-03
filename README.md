@@ -350,6 +350,23 @@ A standalone interactive report built in Power BI Desktop, designed for business
 - **Transparency**: All data sources and transformations documented
 - **Reproducibility**: Analysis can be fully reproduced from raw data
 
+### GDPR & Data Protection Compliance
+This project is fully compliant with the **General Data Protection Regulation (GDPR)** and broader data protection principles:
+
+- **No personal data processed**: The dataset contains only aggregate, country-level economic indicators. No individual-level data, names, addresses, or other personally identifiable information (PII) is collected, stored, or processed at any stage of the pipeline.
+- **Lawful basis**: All data is sourced from the World Bank's publicly available open data portal, released under a permissive licence for research and educational use.
+- **Data minimisation**: Only the variables necessary for the analysis objectives are retained. No surplus data is collected or stored beyond what is required.
+- **Storage & retention**: Raw and cleaned datasets are stored locally within the project repository. No data is transmitted to external servers beyond the Heroku deployment, which serves only the Streamlit dashboard (no database or user tracking).
+- **No automated decision-making**: The machine learning predictions are provided for informational and educational purposes only. No automated decisions affecting individuals are made based on model outputs.
+- **Right to transparency**: This README, the Jupyter notebooks, and the dashboard itself document every data transformation, statistical test, and modelling decision, ensuring full auditability.
+
+### Data Ethics Management
+- **Bias awareness**: Country-level aggregation may mask within-country inequalities. Findings should not be used to stereotype nations or populations.
+- **Responsible communication**: Statistical results are presented with appropriate caveats, confidence levels, and limitations to prevent misinterpretation.
+- **Vulnerable populations**: Food price inflation disproportionately affects low-income households. The analysis aims to inform policy interventions that support, rather than exploit, affected communities.
+- **AI transparency**: AI-assisted development is documented in the notebooks. All AI-generated code was reviewed, tested, and validated by the team before inclusion.
+- **Open access**: The project is open-source, enabling peer review, reproducibility, and community contribution.
+
 ### Legal Implications
 - Data used under World Bank open data licence
 - No commercial restrictions on analysis
