@@ -8,9 +8,9 @@ This project was developed as part of a Code Institute Hackathon by:
 
 | Name | Role |
 |------|------|
-| **Sergio** | Data Analysis & Machine Learning |
-| **Gia** | Data Cleaning & Visualisation |
-| **Florence** | Hypothesis Testing & Documentation |
+| **Florence** | Hypothesis Testing, Documentation & Power BI |
+| **Gia** | Streamlit Dashboard & Project Board |
+| **Sergio** | Streamlit Dashboard & Machine Learning |
 
 ---
 
@@ -104,11 +104,11 @@ This project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mi
 
 ### Hypothesis Testing
 
-**H1**: Food price inflation varies significantly across different regions  
-**H2**: Price volatility (High-Low range) correlates with inflation rates  
-**H3**: There are seasonal patterns in food price movements  
-**H4**: Inflation rates differ significantly across food categories
-**H5**: Time-series models can reasonably forecast short-term food price trends 
+**H1**: Food price inflation varies significantly across different regions
+**H2**: Price volatility (High-Low range) correlates with inflation rates
+**H3**: There are seasonal patterns in food price movements
+**H4**: Food prices have increased significantly over time (2007-2023)
+**H5**: Machine learning models can reasonably forecast short-term inflation trends 
 
 
 ---
@@ -180,7 +180,7 @@ Food_price_inflation_analysis/
 
 | Metric | Description |
 |--------|-------------|
-| Countries | 24 unique countries analysed |
+| Countries | 25 unique countries analysed |
 | Time Span | 16+ years of monthly data |
 | Inflation Range | -31.37% to 96.79% |
 
@@ -197,7 +197,7 @@ Food_price_inflation_analysis/
 Visualisations are created using:
 - **Matplotlib/Seaborn**: Static statistical plots
 - **Plotly**: Interactive visualisations
-- **Power BI/Tableau**: Interactive dashboards
+- **Streamlit**: Interactive web dashboard
 
 ### Dashboard Features
 - Filtering by country, date range
@@ -213,13 +213,11 @@ Visualisations are created using:
 
 | Hypothesis | Test Used | p-value | Result |
 |------------|-----------|---------|--------|
-| **H1:** Countries have different inflation rates | Kruskal-Wallis | < 0.05 | ✅ Significant |
-| **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
-| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
-| **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
-
-**H4:**
-**H5:**
+| **H1:** Countries have different inflation rates | Kruskal-Wallis | 3.23e-138 | ✅ Significant |
+| **H2:** Volatility is related to inflation | Spearman Correlation | 8.01e-81 | ✅ Significant |
+| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | 1.0 | ❌ Not Significant |
+| **H4:** Prices have increased over time | Mann-Whitney U | - | ❌ Not Significant |
+| **H5:** ML models can forecast inflation | Model Evaluation | R² = 0.92 | ✅ Supported |
 
 ### Key Insights
 
@@ -294,10 +292,12 @@ Visualisations are created using:
 | Matplotlib | Static visualisations |
 | Seaborn | Statistical visualisations |
 | Plotly | Interactive visualisations |
+| Streamlit | Interactive web dashboard |
 | SciPy | Statistical testing |
+| Scikit-learn | Machine learning models |
+| XGBoost | Gradient boosting models |
 | Jupyter Notebook | Interactive analysis environment |
 | Git/GitHub | Version control |
-| Power BI/Tableau | Dashboard creation |
 
 ---
 
