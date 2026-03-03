@@ -2304,8 +2304,9 @@ df['quarter'] = df['date'].dt.quarter
             *Streamlit Dashboard, Hypothesis Testing & Project Board*
 
             Managed the project board and contributed to the
-            interactive Streamlit dashboard development. Ensured
-            project coordination and delivery.
+            interactive Streamlit dashboard development. Supported
+            hypothesis testing and ensured project coordination
+            and delivery.
             """)
 
         with col3:
@@ -2315,7 +2316,8 @@ df['quarter'] = df['date'].dt.quarter
 
             Led the development of machine learning models and
             the interactive Streamlit dashboard. Responsible for
-            feature engineering and model evaluation.
+            feature engineering, model evaluation, and hypothesis
+            testing.
             """)
         
         st.markdown('<p class="section-header">Methodology Summary</p>', unsafe_allow_html=True)
