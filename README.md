@@ -104,11 +104,19 @@ This project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mi
 
 ### Hypothesis Testing
 
+<<<<<<< HEAD
 **H1**: Food price inflation varies significantly across different regions
 **H2**: Price volatility (High-Low range) correlates with inflation rates
 **H3**: There are seasonal patterns in food price movements
 **H4**: Food prices have increased significantly over time (2007-2023)
 **H5**: Machine learning models can reasonably forecast short-term inflation trends 
+=======
+**H1**: Food price inflation varies significantly across different regions  
+**H2**: Price volatility (High-Low range) correlates with inflation rates  
+**H3**: There are seasonal patterns in food price movements  
+**H4**: Prices have increased over time
+**H5**: Time-series models can reasonably forecast short-term food price trends 
+>>>>>>> 215e286f848ec89b8cc33b04ac83acaa731cad27
 
 
 ---
