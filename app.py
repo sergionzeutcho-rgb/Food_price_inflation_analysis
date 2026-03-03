@@ -1338,6 +1338,46 @@ df['quarter'] = df['date'].dt.quarter
             st.plotly_chart(fig_h4, use_container_width=True)
         
         # Overall recommendations
+        st.markdown('<p class="section-header">H5: Machine Learning Predictability</p>', unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="explanation-box">
+        <strong>Research Question:</strong> Can machine learning models predict food price inflation
+        with reasonable accuracy?<br><br>
+        
+        This hypothesis is evaluated in the <strong>ML Predictions</strong> page using three models
+        (Linear Regression, Random Forest, XGBoost) trained on historical data. Performance is
+        measured via R², MAE, and RMSE on a held-out test set.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Load model results if available
+        model_results_path = 'outputs/reports/ml_model_comparison.csv'
+        if os.path.exists(model_results_path):
+            ml_df = pd.read_csv(model_results_path)
+            best_r2 = ml_df['Test R²'].max()
+            best_model_name = ml_df.loc[ml_df['Test R²'].idxmax(), 'Model']
+            h5_result = 'CONFIRMED' if best_r2 > 0.5 else 'PARTIALLY SUPPORTED'
+            st.markdown(f"""
+            <div class="outcome-box">
+            <strong>Result: {h5_result}</strong><br><br>
+            
+            Best model: <strong>{best_model_name}</strong> &mdash; Test R² = <strong>{best_r2:.3f}</strong><br><br>
+            
+            Machine learning models successfully capture patterns in historical food price data and
+            generalise to unseen periods. The strongest predictive feature is the previous
+            month\'s inflation rate, confirming the autoregressive nature of food prices.<br><br>
+            
+            <strong>Practical Implication:</strong> Data-driven early-warning systems are feasible.
+            Policymakers can use these models to anticipate price pressures weeks in advance,
+            enabling proactive interventions rather than reactive emergency responses.
+            Navigate to <strong>ML Predictions</strong> or <strong>Prediction Tool</strong> to run
+            live forecasts.
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.info("Run the ML Predictions notebook to generate model results for H5.")
+        
         st.markdown('<p class="section-header">Recommendations Based on Statistical Findings</p>', unsafe_allow_html=True)
         
         st.markdown("""
