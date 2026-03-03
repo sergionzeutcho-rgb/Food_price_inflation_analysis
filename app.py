@@ -1319,18 +1319,31 @@ df['quarter'] = df['date'].dt.quarter
             h3_stat, h3_p = kruskal(*month_groups)
             h3_result = 'SIGNIFICANT' if h3_p < 0.05 else 'NOT SIGNIFICANT'
             
+            if h3_p < 0.05:
+                h3_text = """
+                Our analysis provides evidence for seasonal patterns in food price inflation. Certain months 
+                consistently show higher average inflation rates than others, suggesting that agricultural 
+                production cycles and seasonal demand fluctuations do influence price dynamics.
+                
+                <strong>Practical Implication:</strong> Understanding these patterns enables better planning. 
+                Consumers might time major food purchases to avoid high-inflation periods. Food assistance 
+                programs might increase support during months when prices typically spike.
+                """
+            else:
+                h3_text = """
+                At the global level, no statistically significant seasonal pattern was detected. Monthly 
+                inflation distributions are broadly similar, meaning there is no single month that 
+                consistently drives higher or lower inflation across all countries.
+                
+                <strong>Practical Implication:</strong> While global seasonality is weak, individual 
+                countries may still exhibit local seasonal effects driven by their own agricultural 
+                calendars. Country-level analysis is recommended before drawing planning conclusions.
+                """
+
             st.markdown(f"""
             <div class="outcome-box">
             <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
-            
-            Our analysis provides evidence for seasonal patterns in food price inflation. Certain months 
-            consistently show higher average inflation rates than others, suggesting that agricultural 
-            production cycles and seasonal demand fluctuations do influence price dynamics.
-            
-            <strong>Practical Implication:</strong> Understanding these patterns enables better planning. 
-            Consumers might time major food purchases to avoid high-inflation periods. Food assistance 
-            programs might increase support during months when prices typically spike. Agricultural 
-            planners might work to smooth out production cycles to reduce seasonal price volatility.
+            {h3_text}
             </div>
             """, unsafe_allow_html=True)
             
@@ -1360,8 +1373,8 @@ df['quarter'] = df['date'].dt.quarter
         # Run H4 test and create chart
         fig_h4, mid_year, early_avg, recent_avg = create_price_trend_chart(df_filtered)
         years = sorted(df_filtered['year'].unique())
-        early = df_filtered[df_filtered['year'] < mid_year]['close']
-        recent = df_filtered[df_filtered['year'] >= mid_year]['close']
+        early = df_filtered[df_filtered['year'] < mid_year]['close'].dropna()
+        recent = df_filtered[df_filtered['year'] >= mid_year]['close'].dropna()
         
         if len(early) > 0 and len(recent) > 0:
             h4_stat, h4_p = mannwhitneyu(early, recent)
@@ -1450,10 +1463,10 @@ df['quarter'] = df['date'].dt.quarter
         benefit of moderating inflation. Consider investments in strategic food reserves, improved 
         market information systems, and mechanisms to smooth out supply disruptions.
         
-        <strong>Account for Seasonality in Planning:</strong> Since inflation shows seasonal patterns, 
-        timing matters for interventions. Food assistance programs might be most needed during 
-        high-inflation months, while procurement and storage programs might be most effective during 
-        low-price periods.
+        <strong>Consider Local Seasonality in Planning:</strong> Although global seasonal patterns 
+        were not statistically significant, individual countries may exhibit local seasonal effects. 
+        Country-level analysis is recommended before timing food assistance or procurement programs 
+        around specific months.
         
         <strong>Address Long-term Affordability:</strong> The significant upward trend in food prices 
         demands attention to long-term affordability. Investments in agricultural productivity, 
