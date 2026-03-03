@@ -139,6 +139,7 @@ Food_price_inflation_analysis/
 │   │   ├── h2_volatility_inflation.png
 │   │   ├── h3_seasonal_inflation.png
 │   │   ├── h4_price_trend.png
+│   │   ├── h5_arima_forecast.png
 │   │   ├── ml_model_comparison.png
 │   │   ├── seasonal_analysis.png
 │   │   └── time_series_analysis.png
@@ -180,8 +181,7 @@ Food_price_inflation_analysis/
   - `price_range`: High - Low (volatility indicator)
   - `price_change`: Close - Open
   - `price_change_pct`: Percentage change within period
-  - `year`, `month`, `month_name`: Temporal decomposition
-  - `inflation_available`: Flag for data completeness
+  - `year`, `month`, `quarter`: Temporal decomposition
 
 ### Load
 - Saved cleaned data to `data/cleaned/food_prices_cleaned.csv`
@@ -233,6 +233,11 @@ Food_price_inflation_analysis/
   <br><em>Comparative food price inflation across countries</em>
 </p>
 
+<p align="center">
+  <img src="outputs/figures/seasonal_analysis.png" alt="Seasonal Analysis" width="700"/>
+  <br><em>Seasonal patterns in food price movements</em>
+</p>
+
 ---
 
 ## Visualisations
@@ -276,7 +281,7 @@ A standalone interactive report built in Power BI Desktop, designed for business
 | **H2:** Volatility is related to inflation | Spearman Correlation | < 0.05 | ✅ Significant |
 | **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | Varies | See analysis |
 | **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
-| **H5:**  Time-series models can reasonably forecast short-term food price trends|An ARIMA(1,1,1) model   |RMSE = 10.29 | MAE = 8.93 | ✅ Partially Supported |
+| **H5:** Time-series models can forecast short-term trends | ARIMA(1,1,1) | RMSE = 10.29, MAE = 8.93 | ✅ Partially Supported |
 
 #### Hypothesis Test Visualisations
 
@@ -298,6 +303,11 @@ A standalone interactive report built in Power BI Desktop, designed for business
 <p align="center">
   <img src="outputs/figures/h4_price_trend.png" alt="H4 – Long-term Price Trend" width="700"/>
   <br><em>H4: Long-term upward trend in food prices (2007–2023)</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/h5_arima_forecast.png" alt="H5 – ARIMA Forecast" width="700"/>
+  <br><em>H5: ARIMA(1,1,1) forecast vs actual inflation on 12-month holdout</em>
 </p>
 
 ### Key Insights

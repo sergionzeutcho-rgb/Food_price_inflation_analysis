@@ -1172,9 +1172,11 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Two hypotheses were <strong>statistically significant</strong>:
-        (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation.
-        Two hypotheses were <strong>not significant</strong>: (H3) seasonal patterns; (H4) long-term price increase.
+        <strong>TL;DR</strong> — Three hypotheses were <strong>statistically significant</strong>:
+        (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation;
+        (H4) food prices have significantly increased over time.
+        (H3) Seasonal patterns <strong>vary by analysis</strong>.
+        (H5) ML models <strong>partially support</strong> short-term inflation forecasting.
         Significance level: α = 0.05.
         </div>
         """, unsafe_allow_html=True)
