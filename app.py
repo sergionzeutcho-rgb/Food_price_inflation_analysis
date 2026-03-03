@@ -3,7 +3,7 @@ Food Price Inflation Analysis Dashboard
 =======================================
 A Streamlit dashboard for exploring global food price trends and ML predictions.
 
-Team: Sergio, Gia & Florence
+Team: Florence, Gia & Sergio
 Code Institute Hackathon
 """
 
@@ -20,7 +20,7 @@ from scipy.stats import kruskal, spearmanr, mannwhitneyu
 # Page configuration
 st.set_page_config(
     page_title="Food Price Inflation Analysis",
-    page_icon="🌾",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -62,6 +62,7 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 5px 5px 0;
+        color: #1a1a2e;
     }
     .outcome-box {
         background-color: #e8f8e8;
@@ -69,6 +70,7 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 5px 5px 0;
+        color: #1a1a2e;
     }
     .recommendation-box {
         background-color: #fff8e8;
@@ -76,16 +78,18 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         border-radius: 0 5px 5px 0;
+        color: #1a1a2e;
     }
     /* TL;DR / key-takeaway strip */
     .takeaway-box {
-        background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+        background: linear-gradient(135deg, #e8e4f8 0%, #f0e8f8 100%);
         border: 1px solid #667eea55;
         border-left: 5px solid #667eea;
         padding: 0.85rem 1.1rem;
         margin: 0.5rem 0 1.5rem 0;
         border-radius: 0 8px 8px 0;
         font-size: 0.97rem;
+        color: #1a1a2e;
     }
     /* Risk colour badges */
     .badge-low  { background:#27ae60; color:#fff; padding:2px 9px; border-radius:12px; font-weight:600; }
@@ -544,18 +548,18 @@ def main():
         st.session_state.current_page = "Overview"
     
     # Header
-    st.markdown('<p class="main-header">🌾 Food Price Inflation Analysis</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Food Price Inflation Analysis</p>', unsafe_allow_html=True)
     st.markdown("""
     <p style="text-align: center; color: gray; font-size: 1.05rem; margin-top: 0;">
     Exploring global food price trends and predicting inflation patterns<br>
-    <small>Team: Sergio, Gia &amp; Florence &nbsp;|&nbsp; Code Institute Hackathon</small>
+    <small>Team: Florence, Gia &amp; Sergio &nbsp;|&nbsp; Code Institute Hackathon</small>
     </p>
     """, unsafe_allow_html=True)
     
     # Navigation Bar in Header (visible on all pages)
     nav_pages = ["Overview", "Data Cleaning", "Data Analysis", "Hypothesis Testing", 
                  "ML Predictions", "Prediction Tool", "Country Explorer", "About"]
-    nav_icons = ["🏠", "🧹", "📊", "🔬", "🤖", "🔮", "🌍", "ℹ️"]
+    nav_icons = ["", "", "", "", "", "", "", ""]
     
     # Create navigation buttons in columns
     nav_cols = st.columns(len(nav_pages))
@@ -594,7 +598,7 @@ def main():
     
     # Filters
     st.sidebar.markdown("---")
-    st.sidebar.subheader("🔎 Filters")
+    st.sidebar.subheader("Filters")
     
     countries = ["All Countries"] + sorted(df['country'].unique().tolist())
     selected_country = st.sidebar.selectbox(
@@ -620,11 +624,11 @@ def main():
     if filters_active:
         st.sidebar.markdown("**Active filters:**")
         if selected_country != default_country:
-            st.sidebar.info(f"🌍 {selected_country}")
+            st.sidebar.info(f"{selected_country}")
         if year_range != default_years:
-            st.sidebar.info(f"📅 {year_range[0]} – {year_range[1]}")
-    
-    if st.sidebar.button("🔄 Reset Filters", use_container_width=True, disabled=not filters_active):
+            st.sidebar.info(f"{year_range[0]} – {year_range[1]}")
+
+    if st.sidebar.button("Reset Filters", use_container_width=True, disabled=not filters_active):
         st.session_state["_reset_country"] = True
         st.rerun()
     
@@ -647,34 +651,34 @@ def main():
         avg_inf_all = df['inflation'].mean()
         st.markdown(f"""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — Over 16 years (2007–2023) food prices rose significantly across 
+        <strong>TL;DR</strong> — Over 16 years (2007–2023) food prices rose significantly across 
         25 countries. Average global inflation stood at <strong>{avg_inf_all:.1f}%</strong> per year, 
         with large regional differences. Scroll down or use a page in the navigation bar to dive deeper.
         </div>
         """, unsafe_allow_html=True)
         
         # How to Use expander
-        with st.expander("📖 How to Use This Dashboard", expanded=False):
+        with st.expander("How to Use This Dashboard", expanded=False):
             st.markdown("""
             **Getting Started**
-            
+
             | Step | What to do |
             |------|-----------|
-            | 1️⃣ | Use the **top navigation buttons** (or the sidebar) to switch between pages |
-            | 2️⃣ | Use the **sidebar filters** to narrow data by country or year range |
-            | 3️⃣ | Hover any chart to see exact values; click legend items to show/hide series |
-            | 4️⃣ | Visit **🔮 Prediction Tool** to forecast future inflation for any country |
-            | 5️⃣ | Visit **🌍 Country Explorer** to download filtered data as CSV |
-            
+            | 1 | Use the **top navigation buttons** (or the sidebar) to switch between pages |
+            | 2 | Use the **sidebar filters** to narrow data by country or year range |
+            | 3 | Hover any chart to see exact values; click legend items to show/hide series |
+            | 4 | Visit **Prediction Tool** to forecast future inflation for any country |
+            | 5 | Visit **Country Explorer** to download filtered data as CSV |
+
             **Page Guide**
-            - **🏠 Overview** — big-picture summary and key metrics  
-            - **🧹 Data Cleaning** — how the raw dataset was prepared  
-            - **📊 Data Analysis** — distributions, correlations and seasonal patterns  
-            - **🔬 Hypothesis Testing** — statistically validated findings  
-            - **🤖 ML Predictions** — model training, comparison and feature importance  
-            - **🔮 Prediction Tool** — interactive inflation forecaster  
-            - **🌍 Country Explorer** — per-country deep-dive and data download  
-            - **ℹ️ About** — team, methodology and data source  
+            - **Overview** — big-picture summary and key metrics
+            - **Data Cleaning** — how the raw dataset was prepared
+            - **Data Analysis** — distributions, correlations and seasonal patterns
+            - **Hypothesis Testing** — statistically validated findings
+            - **ML Predictions** — model training, comparison and feature importance
+            - **Prediction Tool** — interactive inflation forecaster
+            - **Country Explorer** — per-country deep-dive and data download
+            - **About** — team, methodology and data source
             """)
         
         st.markdown("""
@@ -769,25 +773,25 @@ def main():
         with action_col1:
             st.markdown("""
             <div class="explanation-box">
-            <strong>🔮 Prediction Tool</strong><br>
+            <strong>Prediction Tool</strong><br>
             Use our ML model to forecast inflation for any country and time period.
             Navigate to <em>Prediction Tool</em> in the sidebar.
             </div>
             """, unsafe_allow_html=True)
-        
+
         with action_col2:
             st.markdown("""
             <div class="outcome-box">
-            <strong>🌍 Country Explorer</strong><br>
+            <strong>Country Explorer</strong><br>
             Dive deep into country-specific data, compare statistics, and export data.
             Navigate to <em>Country Explorer</em> in the sidebar.
             </div>
             """, unsafe_allow_html=True)
-        
+
         with action_col3:
             st.markdown("""
             <div class="recommendation-box">
-            <strong>📊 Hypothesis Testing</strong><br>
+            <strong>Hypothesis Testing</strong><br>
             Review our statistical findings and validated hypotheses about food prices.
             Navigate to <em>Hypothesis Testing</em> in the sidebar.
             </div>
@@ -799,7 +803,7 @@ def main():
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
+        <strong>TL;DR</strong> — The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
         validated and enriched with 6 new features (volatility, price change, month, year…).
         Missing inflation values (≈7.6%) were kept intentionally — they are structural gaps from the
         year-over-year calculation, not errors.
@@ -930,7 +934,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — Food prices are right-skewed and have risen steadily since 2007.
+        <strong>TL;DR</strong> — Food prices are right-skewed and have risen steadily since 2007.
         Country-level inflation ranges from near 0% to over 20%. Price volatility and inflation are
         positively correlated, and mild seasonal patterns exist — use the sidebar to filter by country.
         </div>
@@ -1000,7 +1004,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="recommendation-box">
-        🧠 <strong>What does this mean for you?</strong><br>
+        <strong>What does this mean for you?</strong><br>
         Countries at the <em>top of the chart</em> (highest inflation) face the greatest food-affordability
         pressures. Policymakers in those nations should prioritise import diversification, strategic
         reserves, and targeted consumer subsidies. Businesses operating across borders should weight
@@ -1040,7 +1044,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="recommendation-box">
-        🧠 <strong>What does this mean for you?</strong><br>
+        <strong>What does this mean for you?</strong><br>
         The strong link between price <em>volatility</em> (High−Low range) and <em>inflation</em> is the
         key practical finding here. It means that when prices swing wildly within a single month,
         overall price levels tend to be rising too. Smoothing-out those swings — through better
@@ -1068,7 +1072,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="recommendation-box">
-        🧠 <strong>What does this mean for you?</strong><br>
+        <strong>What does this mean for you?</strong><br>
         If you see a clear seasonal spike in certain months for your selected country, that is a
         signal to <em>stock up before</em> those months or to look for suppliers in the southern
         hemisphere who are in their harvest season when you are in a price-spike period.
@@ -1115,9 +1119,9 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — All four hypotheses were <strong>confirmed statistically</strong>:
-        (H1) inflation differs significantly by country; (H2) price volatility drives higher inflation;
-        (H3) seasonal monthly patterns exist; (H4) food prices have significantly increased long-term.
+        <strong>TL;DR</strong> — Two hypotheses were <strong>statistically significant</strong>:
+        (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation.
+        Two hypotheses were <strong>not significant</strong>: (H3) seasonal patterns; (H4) long-term price increase.
         Significance level: α = 0.05.
         </div>
         """, unsafe_allow_html=True)
@@ -1371,7 +1375,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — Three models were trained: Linear Regression, Random Forest, and
+        <strong>TL;DR</strong> — Three models were trained: Linear Regression, Random Forest, and
         XGBoost. The best model explains the majority of inflation variance (R² on test data). The
         strongest predictor is <em>last month’s inflation</em>. Head to
         <strong>🔮 Prediction Tool</strong> to run live forecasts.
@@ -1544,11 +1548,11 @@ df['quarter'] = df['date'].dt.quarter
     
     # ============= PAGE: PREDICTION TOOL =============
     elif page == "Prediction Tool":
-        st.markdown('<p class="main-header">🔮 Inflation Prediction Tool</p>', unsafe_allow_html=True)
+        st.markdown('<p class="main-header">Inflation Prediction Tool</p>', unsafe_allow_html=True)
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
+        <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
         with one click (data auto-filled from history), or <strong>Custom Prediction</strong> to tweak
         every input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
         historical chart with your forecast plotted.
@@ -1577,14 +1581,14 @@ df['quarter'] = df['date'].dt.quarter
             # Prediction mode selection
             prediction_mode = st.radio(
                 "Select Prediction Mode:",
-                ["🚀 Quick Prediction", "⚙️ Custom Prediction"],
+                ["Quick Prediction", "Custom Prediction"],
                 horizontal=True,
                 help="Quick mode uses historical averages, Custom mode allows manual input"
             )
             
             st.markdown("---")
             
-            if prediction_mode == "🚀 Quick Prediction":
+            if prediction_mode == "Quick Prediction":
                 st.markdown('<p class="section-header">Quick Prediction</p>', unsafe_allow_html=True)
                 
                 st.markdown("""
@@ -1601,21 +1605,21 @@ df['quarter'] = df['date'].dt.quarter
                 
                 with quick_col1:
                     quick_country = st.selectbox(
-                        "🌍 Select Country",
+                        "Select Country",
                         available_countries,
                         key="quick_country"
                     )
                 
                 with quick_col2:
                     quick_year = st.selectbox(
-                        "📅 Target Year",
+                        "Target Year",
                         options=[2024, 2025, 2026, 2027, 2028],
                         key="quick_year"
                     )
                 
                 with quick_col3:
                     quick_month = st.selectbox(
-                        "📆 Target Month",
+                        "Target Month",
                         options=list(range(1, 13)),
                         format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
                                               'July', 'August', 'September', 'October', 'November', 'December'][x-1],
@@ -1645,7 +1649,7 @@ df['quarter'] = df['date'].dt.quarter
                         st.metric("Avg Volatility", f"{volatility:.4f}")
                     
                     # Quick prediction button
-                    if st.button("🔮 Generate Quick Prediction", type="primary", use_container_width=True):
+                    if st.button("Generate Prediction", type="primary", use_container_width=True):
                         with st.spinner("Generating prediction..."):
                             try:
                                 quick_quarter = (quick_month - 1) // 3 + 1
@@ -1696,7 +1700,7 @@ df['quarter'] = df['date'].dt.quarter
                                 
                                 # Display results
                                 st.markdown("---")
-                                st.markdown('<p class="section-header">📊 Prediction Results</p>', unsafe_allow_html=True)
+                                st.markdown('<p class="section-header">Prediction Results</p>', unsafe_allow_html=True)
                                 
                                 last_inf = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
                                 delta_val = prediction - last_inf
@@ -1828,7 +1832,7 @@ df['quarter'] = df['date'].dt.quarter
                 input_col1, input_col2, input_col3 = st.columns(3)
                 
                 with input_col1:
-                    st.markdown("**🌍 Location & Time**")
+                    st.markdown("**Location & Time**")
                     
                     custom_country = st.selectbox(
                         "Country",
@@ -1856,7 +1860,7 @@ df['quarter'] = df['date'].dt.quarter
                     st.info(f"Quarter: Q{custom_quarter}")
                 
                 with input_col2:
-                    st.markdown("**💰 Price Features**")
+                    st.markdown("**Price Features**")
                     
                     custom_close = st.number_input(
                         "Current Price Index",
@@ -1889,7 +1893,7 @@ df['quarter'] = df['date'].dt.quarter
                     )
                 
                 with input_col3:
-                    st.markdown("**📈 Historical Averages**")
+                    st.markdown("**Historical Averages**")
                     
                     custom_lag3 = st.number_input(
                         "3-Month Avg Inflation (%)",
@@ -1919,7 +1923,7 @@ df['quarter'] = df['date'].dt.quarter
                     )
                 
                 # Advanced options expander
-                with st.expander("🔧 Advanced Features (Optional)"):
+                with st.expander("Advanced Features (Optional)"):
                     adv_col1, adv_col2 = st.columns(2)
                     
                     with adv_col1:
@@ -1961,7 +1965,7 @@ df['quarter'] = df['date'].dt.quarter
                         )
                 
                 # Prediction button
-                if st.button("🔮 Generate Custom Prediction", type="primary", use_container_width=True):
+                if st.button("Generate Prediction", type="primary", use_container_width=True):
                     with st.spinner("Processing prediction..."):
                         try:
                             input_features = {
@@ -2005,7 +2009,7 @@ df['quarter'] = df['date'].dt.quarter
                             
                             # Display results
                             st.markdown("---")
-                            st.markdown('<p class="section-header">📊 Custom Prediction Results</p>', unsafe_allow_html=True)
+                            st.markdown('<p class="section-header">Custom Prediction Results</p>', unsafe_allow_html=True)
                             
                             risk_label, risk_class = get_risk_label(prediction)
                             delta_vs_prev = prediction - custom_lag1
@@ -2094,9 +2098,9 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — Compare all countries side-by-side or drill into one using the
+        <strong>TL;DR</strong> — Compare all countries side-by-side or drill into one using the
         sidebar filter. The table below ranks every country by average inflation. Use the
-        <strong>📊 Download</strong> buttons to export the data you’re viewing.
+        <strong>Download</strong> buttons to export the data you’re viewing.
         </div>
         """, unsafe_allow_html=True)
         
@@ -2129,7 +2133,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="recommendation-box">
-        🧠 <strong>What does this mean for you?</strong><br>
+        <strong>What does this mean for you?</strong><br>
         Countries with <em>high average inflation and high standard deviation</em> are the most
         unpredictable markets — prices can swing sharply. Buyers sourcing from those countries should
         build in cost buffers or use fixed-price contracts. Countries with <em>low Infl Std</em> offer
@@ -2138,7 +2142,7 @@ df['quarter'] = df['date'].dt.quarter
         """, unsafe_allow_html=True)
         
         # Data Export Section
-        st.markdown('<p class="section-header">📥 Data Export</p>', unsafe_allow_html=True)
+        st.markdown('<p class="section-header">Data Export</p>', unsafe_allow_html=True)
         
         export_col1, export_col2 = st.columns(2)
         
@@ -2146,7 +2150,7 @@ df['quarter'] = df['date'].dt.quarter
             # Export filtered data
             csv_data = df_filtered.to_csv(index=False)
             st.download_button(
-                label="📊 Download Filtered Data (CSV)",
+                label="Download Filtered Data (CSV)",
                 data=csv_data,
                 file_name=f"food_price_data_{selected_country.replace(' ', '_').lower()}.csv",
                 mime="text/csv",
@@ -2157,7 +2161,7 @@ df['quarter'] = df['date'].dt.quarter
             # Export country statistics
             stats_csv = country_stats.reset_index().to_csv(index=False)
             st.download_button(
-                label="📈 Download Country Statistics (CSV)",
+                label="Download Country Statistics (CSV)",
                 data=stats_csv,
                 file_name="country_statistics.csv",
                 mime="text/csv",
@@ -2176,7 +2180,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        💡 <strong>TL;DR</strong> — This dashboard was built by a three-person team for the Code 
+        <strong>TL;DR</strong> — This dashboard was built by a three-person team for the Code 
         Institute Data Analytics Hackathon. It analyses global food price inflation across 25 countries 
         (2007–2023) using statistical testing and machine learning to forecast future inflation trends.
         </div>
@@ -2199,29 +2203,29 @@ df['quarter'] = df['date'].dt.quarter
         
         with col1:
             st.markdown("""
-            **Sergio**  
-            *Data Analysis & Machine Learning*
-            
-            Led the development of machine learning models and the interactive Streamlit dashboard. 
-            Responsible for feature engineering and model evaluation.
+            **Florence**
+            *Hypothesis Testing, Documentation & Power BI*
+
+            Designed and implemented the statistical hypothesis tests. Prepared comprehensive
+            documentation and created Power BI visualisations for stakeholder communication.
             """)
-        
+
         with col2:
             st.markdown("""
-            **Gia**  
-            *Data Cleaning & Visualisation*
-            
-            Managed the data preprocessing pipeline and created visualisations for exploratory 
-            analysis. Ensured data quality and consistency throughout the project.
+            **Gia**
+            *Streamlit Dashboard & Project Board*
+
+            Managed the project board and contributed to the interactive Streamlit dashboard development.
+            Ensured project coordination and delivery.
             """)
-        
+
         with col3:
             st.markdown("""
-            **Florence**  
-            *Hypothesis Testing & Documentation*
-            
-            Designed and implemented the statistical hypothesis tests. Prepared comprehensive 
-            documentation and interpreted results for stakeholder communication.
+            **Sergio**
+            *Streamlit Dashboard & Machine Learning*
+
+            Led the development of machine learning models and the interactive Streamlit dashboard.
+            Responsible for feature engineering and model evaluation.
             """)
         
         st.markdown('<p class="section-header">Methodology Summary</p>', unsafe_allow_html=True)
@@ -2277,7 +2281,7 @@ df['quarter'] = df['date'].dt.quarter
         st.markdown("""
         <p style="text-align: center; color: gray;">
         <small>Code Institute Data Analytics Hackathon | March 2026<br>
-        Team: Sergio, Gia & Florence</small>
+        Team: Florence, Gia & Sergio</small>
         </p>
         """, unsafe_allow_html=True)
     
