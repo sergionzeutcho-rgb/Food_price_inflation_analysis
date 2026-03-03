@@ -1965,95 +1965,95 @@ df['quarter'] = df['date'].dt.quarter
                                     
                                     st.plotly_chart(fig, use_container_width=True)
                                 
-                                # --- Multi-step rolling forecast ---
-                                st.markdown('<p class="section-header">Multi-Step Forecast</p>', unsafe_allow_html=True)
-                                horizon = st.slider("Forecast horizon (months)", 1, 12, 6, key="forecast_horizon")
-                                
-                                if st.button("Run Rolling Forecast", key="btn_rolling"):
-                                    with st.spinner("Running multi-step forecast..."):
-                                        rolling_results = []
-                                        # seed values from latest history
-                                        seed_inf   = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
-                                        seed_close = float(latest['close'])
-                                        seed_range = float(country_data['price_range'].mean())
-                                        recent_inf = list(country_data['inflation'].dropna().tail(12))
-                                        recent_prices = list(country_data['close'].tail(12))
-                                        
-                                        for step in range(horizon):
-                                            m = ((quick_month - 1 + step) % 12) + 1
-                                            y = quick_year + (quick_month - 1 + step) // 12
-                                            q = (m - 1) // 3 + 1
-                                            
-                                            step_features = {
-                                                'year': y, 'month': m, 'quarter': q,
-                                                'close': seed_close,
-                                                'price_range': seed_range,
-                                                'inflation_lag_1': recent_inf[-1] if recent_inf else seed_inf,
-                                                'inflation_lag_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
-                                                'inflation_lag_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
-                                                'inflation_lag_12': float(np.mean(recent_inf[-12:])) if len(recent_inf) >= 12 else seed_inf,
-                                                'price_lag_1': recent_prices[-1] if recent_prices else seed_close,
-                                                'price_ma_3': float(np.mean(recent_prices[-3:])) if len(recent_prices) >= 3 else seed_close,
-                                                'price_ma_6': float(np.mean(recent_prices[-6:])) if len(recent_prices) >= 6 else seed_close,
-                                                'price_ma_12': float(np.mean(recent_prices[-12:])) if len(recent_prices) >= 12 else seed_close,
-                                                'inflation_ma_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
-                                                'inflation_ma_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
-                                            }
-                                            if encoder is not None:
-                                                try:
-                                                    step_features['country_encoded'] = encoder.transform([quick_country])[0]
-                                                except (ValueError, KeyError):
-                                                    step_features['country_encoded'] = 0
-                                            
-                                            step_df = pd.DataFrame([step_features])
-                                            if feature_cols is not None:
-                                                for col in feature_cols:
-                                                    if col not in step_df.columns:
-                                                        step_df[col] = 0
-                                                step_df = step_df[feature_cols]
-                                            
-                                            step_scaled = scaler.transform(step_df) if scaler else step_df.values
-                                            step_pred = float(model.predict(step_scaled)[0])
-                                            
-                                            rolling_results.append({
-                                                "Date": pd.Timestamp(year=y, month=m, day=1),
-                                                "Month": MONTH_NAMES[m - 1],
-                                                "Year": y,
-                                                "Predicted Inflation (%)": round(step_pred, 2)
-                                            })
-                                            # feed prediction back
-                                            recent_inf.append(step_pred)
-                                            recent_prices.append(seed_close)  # price stays approx constant
-                                        
-                                        roll_df = pd.DataFrame(rolling_results)
-                                        st.dataframe(roll_df, use_container_width=True)
-                                        
-                                        # Rolling forecast chart
-                                        fig_roll = go.Figure()
-                                        fig_roll.add_trace(go.Scatter(
-                                            x=roll_df["Date"], y=roll_df["Predicted Inflation (%)"],
-                                            mode='lines+markers', name='Forecast',
-                                            line=dict(color=COLOR_HIGH, width=2, dash='dot'),
-                                            marker=dict(size=8, symbol='star')
-                                        ))
-                                        fig_roll.add_hline(y=hist_avg, line_dash="dash", line_color=COLOR_MED,
-                                                           annotation_text=f"Avg: {hist_avg:.1f}%")
-                                        fig_roll.update_layout(
-                                            title=f"{horizon}-Month Rolling Forecast: {quick_country}",
-                                            xaxis_title="Date", yaxis_title="Inflation (%)", height=380
-                                        )
-                                        st.plotly_chart(fig_roll, use_container_width=True)
-                                        
-                                        # Download button for rolling forecast
-                                        csv_roll = roll_df.to_csv(index=False)
-                                        st.download_button(
-                                            "Download Forecast (CSV)", csv_roll,
-                                            file_name=f"forecast_{quick_country.replace(' ', '_').lower()}_{horizon}m.csv",
-                                            mime="text/csv"
-                                        )
-                                
                             except Exception as e:
                                 st.error(f"❌ Error making prediction: {str(e)}")
+                    
+                    # --- Multi-step rolling forecast (outside Generate Prediction button) ---
+                    st.markdown('<p class="section-header">Multi-Step Forecast</p>', unsafe_allow_html=True)
+                    horizon = st.slider("Forecast horizon (months)", 1, 12, 6, key="forecast_horizon")
+                    
+                    if st.button("Run Rolling Forecast", key="btn_rolling"):
+                        with st.spinner("Running multi-step forecast..."):
+                            try:
+                                rolling_results = []
+                                hist_avg = float(country_data['inflation'].mean())
+                                seed_inf   = float(latest['inflation']) if pd.notna(latest['inflation']) else hist_avg
+                                seed_close = float(latest['close'])
+                                seed_range = float(country_data['price_range'].mean())
+                                recent_inf = list(country_data['inflation'].dropna().tail(12))
+                                recent_prices = list(country_data['close'].tail(12))
+                                
+                                for step in range(horizon):
+                                    m = ((quick_month - 1 + step) % 12) + 1
+                                    y = quick_year + (quick_month - 1 + step) // 12
+                                    q = (m - 1) // 3 + 1
+                                    
+                                    step_features = {
+                                        'year': y, 'month': m, 'quarter': q,
+                                        'close': seed_close,
+                                        'price_range': seed_range,
+                                        'inflation_lag_1': recent_inf[-1] if recent_inf else seed_inf,
+                                        'inflation_lag_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
+                                        'inflation_lag_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
+                                        'inflation_lag_12': float(np.mean(recent_inf[-12:])) if len(recent_inf) >= 12 else seed_inf,
+                                        'price_lag_1': recent_prices[-1] if recent_prices else seed_close,
+                                        'price_ma_3': float(np.mean(recent_prices[-3:])) if len(recent_prices) >= 3 else seed_close,
+                                        'price_ma_6': float(np.mean(recent_prices[-6:])) if len(recent_prices) >= 6 else seed_close,
+                                        'price_ma_12': float(np.mean(recent_prices[-12:])) if len(recent_prices) >= 12 else seed_close,
+                                        'inflation_ma_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
+                                        'inflation_ma_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
+                                    }
+                                    if encoder is not None:
+                                        try:
+                                            step_features['country_encoded'] = encoder.transform([quick_country])[0]
+                                        except (ValueError, KeyError):
+                                            step_features['country_encoded'] = 0
+                                    
+                                    step_df = pd.DataFrame([step_features])
+                                    if feature_cols is not None:
+                                        for col in feature_cols:
+                                            if col not in step_df.columns:
+                                                step_df[col] = 0
+                                        step_df = step_df[feature_cols]
+                                    
+                                    step_scaled = scaler.transform(step_df) if scaler else step_df.values
+                                    step_pred = float(model.predict(step_scaled)[0])
+                                    
+                                    rolling_results.append({
+                                        "Date": pd.Timestamp(year=y, month=m, day=1),
+                                        "Month": MONTH_NAMES[m - 1],
+                                        "Year": y,
+                                        "Predicted Inflation (%)": round(step_pred, 2)
+                                    })
+                                    recent_inf.append(step_pred)
+                                    recent_prices.append(seed_close)
+                                
+                                roll_df = pd.DataFrame(rolling_results)
+                                st.dataframe(roll_df, use_container_width=True)
+                                
+                                fig_roll = go.Figure()
+                                fig_roll.add_trace(go.Scatter(
+                                    x=roll_df["Date"], y=roll_df["Predicted Inflation (%)"],
+                                    mode='lines+markers', name='Forecast',
+                                    line=dict(color=COLOR_HIGH, width=2, dash='dot'),
+                                    marker=dict(size=8, symbol='star')
+                                ))
+                                fig_roll.add_hline(y=hist_avg, line_dash="dash", line_color=COLOR_MED,
+                                                   annotation_text=f"Avg: {hist_avg:.1f}%")
+                                fig_roll.update_layout(
+                                    title=f"{horizon}-Month Rolling Forecast: {quick_country}",
+                                    xaxis_title="Date", yaxis_title="Inflation (%)", height=380
+                                )
+                                st.plotly_chart(fig_roll, use_container_width=True)
+                                
+                                csv_roll = roll_df.to_csv(index=False)
+                                st.download_button(
+                                    "Download Forecast (CSV)", csv_roll,
+                                    file_name=f"forecast_{quick_country.replace(' ', '_').lower()}_{horizon}m.csv",
+                                    mime="text/csv"
+                                )
+                            except Exception as e:
+                                st.error(f"❌ Error running rolling forecast: {str(e)}")
                 else:
                     st.warning(f"No historical data available for {quick_country}")
             
