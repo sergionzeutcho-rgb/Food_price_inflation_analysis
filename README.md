@@ -195,15 +195,16 @@ Food_price_inflation_analysis/
 ## Visualisations
 
 Visualisations are created using:
-- **Matplotlib/Seaborn**: Static statistical plots
-- **Plotly**: Interactive visualisations
-- **Streamlit**: Interactive web dashboard
+- **Plotly**: Interactive charts (time series, heatmaps, boxplots, scatter plots, gauge charts)
+- **Streamlit**: Live, filterable dashboard with country and date controls
 
 ### Dashboard Features
-- Filtering by country, date range
-- Interactive time series exploration
-- Comparative analysis views
-- Drill-down capabilities
+- Sidebar filtering by country, date range, metric
+- Interactive time series and country comparison
+- Seasonal and correlation heatmap exploration
+- Live hypothesis test results with dynamic charts
+- ML prediction tool with gauge chart and risk badge
+- Country Explorer with stats and CSV export
 
 ---
 
@@ -215,9 +216,9 @@ Visualisations are created using:
 |------------|-----------|---------|--------|
 | **H1:** Countries have different inflation rates | Kruskal-Wallis | 3.23e-138 | ✅ Significant |
 | **H2:** Volatility is related to inflation | Spearman Correlation | 8.01e-81 | ✅ Significant |
-| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | 1.0 | ❌ Not Significant |
-| **H4:** Prices have increased over time | Mann-Whitney U | - | ❌ Not Significant |
-| **H5:** ML models can forecast inflation | Model Evaluation | R² = 0.92 | ✅ Supported |
+| **H3:** Seasonal patterns exist in inflation | Kruskal-Wallis | < 0.05 | ✅ Significant |
+| **H4:** Food prices have significantly increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
+| **H5:** ML models can predict inflation | XGBoost / Random Forest | R² > 0.80 | ✅ Confirmed |
 
 ### Key Insights
 
@@ -289,15 +290,15 @@ Visualisations are created using:
 | Python 3.12 | Primary programming language |
 | Pandas | Data manipulation and analysis |
 | NumPy | Numerical computations |
-| Matplotlib | Static visualisations |
-| Seaborn | Statistical visualisations |
-| Plotly | Interactive visualisations |
-| Streamlit | Interactive web dashboard |
-| SciPy | Statistical testing |
-| Scikit-learn | Machine learning models |
-| XGBoost | Gradient boosting models |
-| Jupyter Notebook | Interactive analysis environment |
-| Git/GitHub | Version control |
+| Plotly | Interactive visualisations in dashboard |
+| Matplotlib / Seaborn | Static charts in analysis notebooks |
+| Streamlit 1.40 | Interactive web dashboard (deployed app) |
+| SciPy | Statistical hypothesis testing |
+| Scikit-learn | Machine learning pipeline & preprocessing |
+| XGBoost | Best-performing prediction model |
+| Joblib | Model serialisation |
+| Jupyter Notebook | Data exploration and analysis |
+| Git/GitHub | Version control & collaboration |
 
 ---
 
