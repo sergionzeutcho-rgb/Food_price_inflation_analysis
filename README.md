@@ -211,6 +211,28 @@ Food_price_inflation_analysis/
 3. **Correlation Analysis**: Price-inflation relationships
 4. **Comparative Analysis**: Cross-country comparisons
 
+#### Sample Visualisations from the Analysis
+
+<p align="center">
+  <img src="outputs/figures/distribution_analysis.png" alt="Distribution Analysis" width="700"/>
+  <br><em>Distribution of key price and inflation variables</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/correlation_matrix.png" alt="Correlation Matrix" width="700"/>
+  <br><em>Correlation heatmap showing relationships between price indicators and inflation</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/time_series_analysis.png" alt="Time Series Analysis" width="700"/>
+  <br><em>Food price trends over time (2007–2023)</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/country_comparison.png" alt="Country Comparison" width="700"/>
+  <br><em>Comparative food price inflation across countries</em>
+</p>
+
 ---
 
 ## Visualisations
@@ -256,13 +278,53 @@ A standalone interactive report built in Power BI Desktop, designed for business
 | **H4:** Prices have increased over time | Mann-Whitney U | < 0.05 | ✅ Significant |
 | **H5:**  Time-series models can reasonably forecast short-term food price trends|An ARIMA(1,1,1) model   |RMSE = 10.29 | MAE = 8.93 | ✅ Partially Supported |
 
+#### Hypothesis Test Visualisations
+
+<p align="center">
+  <img src="outputs/figures/h1_regional_inflation.png" alt="H1 – Regional Inflation" width="700"/>
+  <br><em>H1: Regional inflation distribution — significant differences across countries</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/h2_volatility_inflation.png" alt="H2 – Volatility vs Inflation" width="700"/>
+  <br><em>H2: Price volatility (High−Low range) vs inflation rate</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/h3_seasonal_inflation.png" alt="H3 – Seasonal Inflation" width="700"/>
+  <br><em>H3: Seasonal patterns in food price inflation</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/h4_price_trend.png" alt="H4 – Long-term Price Trend" width="700"/>
+  <br><em>H4: Long-term upward trend in food prices (2007–2023)</em>
+</p>
+
 ### Key Insights
 
 1. **Regional Disparities**: Food price inflation varies significantly across countries, indicating that local factors (supply chains, policies, climate) play a crucial role
 2. **Volatility-Inflation Link**: Higher price volatility is associated with higher inflation rates, suggesting that price stabilisation policies could help control inflation
 3. **Long-term Upward Trend**: Food prices have significantly increased from 2007 to 2023, raising concerns about food affordability globally
 4. **Predictive Potential**: Machine learning models can forecast inflation trends with reasonable accuracy, enabling proactive policy responses
-5. ** An ARIMA(1,1,1) modelThe model captures time dependency and general trend direction, but forecasting accuracy is moderate due to structural volatility and post-2020 inflation shocks.
+5. **ARIMA Forecasting**: The ARIMA(1,1,1) model captures time dependency and general trend direction, but forecasting accuracy is moderate due to structural volatility and post-2020 inflation shocks.
+
+#### Machine Learning Visualisations
+
+<p align="center">
+  <img src="outputs/figures/ml_model_comparison.png" alt="ML Model Comparison" width="700"/>
+  <br><em>Model performance comparison — R² scores across candidate algorithms</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/feature_importance.png" alt="Feature Importance" width="700"/>
+  <br><em>Feature importance from the best-performing model</em>
+</p>
+
+<p align="center">
+  <img src="outputs/figures/actual_vs_predicted.png" alt="Actual vs Predicted" width="700"/>
+  <br><em>Actual vs predicted inflation — model validation</em>
+</p>
+
 ---
 
 ## Ethical Considerations
