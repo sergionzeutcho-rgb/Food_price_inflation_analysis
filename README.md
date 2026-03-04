@@ -8,7 +8,7 @@ This project was developed as part of a Code Institute Hackathon by:
 
 | Name | Role |
 |------|------|
-| **Florence** | Hypothesis Testing, Documentation & Power BI |
+| **Funmi** | Hypothesis Testing, Documentation & Power BI |
 | **Gia** | Streamlit Dashboard, Hypothesis Testing & Project Board |
 | **Sergio** | Streamlit Dashboard, Machine Learning & Hypothesis Testing |
 
@@ -266,13 +266,34 @@ An interactive Python-powered web app with 8 pages, deployed via Heroku.
 **Key features:** sidebar filters (country, year), Key Takeaway insight boxes, "What does this mean?" interpretation panels, risk badges (Low / Medium / High), and 24-month historical charts with forecast overlay.
 
 ### 📊 Power BI Dashboard (`Power Bi/Food Price Inflation Analysis.pbix`)
-A standalone interactive report built in Power BI Desktop, designed for business stakeholders.
+A standalone interactive report built in Power BI Desktop, designed for business stakeholders.https://app.powerbi.com/groups/me/reports/891a4da5-dcf0-4de5-98ec-5659a0854c47/cfe237a79690ad3488a2?experience=power-bi
 
 - Country and year slicers for cross-filtering
 - Inflation trend line charts by region
 - Comparative country performance visuals
 - Volatility and price range analysis
 - KPI cards for key summary statistics
+
+## Executive Dashboard
+An overview of global food inflation trends, highlighting overall price movements, key summary metrics, and country slicers
+
+<p align="center">
+  <img src="images/executive_dashboard.png" width="700">
+</p>
+
+### Volatility Analysis (H1 & H2)
+Visual analysis of how inflation varies across countries and the relationship between price volatility and inflation levels.
+<p align="center">
+  <img src="images/volatility_analysis.png" width="700">
+</p>
+
+### Forecast Validation (H5)
+Comparison of actual and predicted inflation values to evaluate the forecasting model’s short-term predictive performance.
+
+<p align="center">
+  <img src="images/forecast_dashboard.png" width="700">
+</p>
+
 
 ---
 
