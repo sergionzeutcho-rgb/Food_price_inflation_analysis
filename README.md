@@ -280,20 +280,20 @@ A standalone interactive report built in Power BI Desktop, designed for business
 An overview of global food inflation trends, highlighting overall price movements, key summary metrics, and country slicers
 
 <p align="center">
-  <img src="images/executive_dashboard.png" width="700">
+  <img src="images/Executive Overview.png" width="700">
 </p>
 
 ### Volatility Analysis (H1 & H2)
 Visual analysis of how inflation varies across countries and the relationship between price volatility and inflation levels.
 <p align="center">
-  <img src="images/volatility_analysis.png" width="700">
+  <img src="images/Volatility & Country Inflation.png" width="700">
 </p>
 
 ### Forecast Validation (H5)
 Comparison of actual and predicted inflation values to evaluate the forecasting model’s short-term predictive performance.
 
 <p align="center">
-  <img src="images/forecast_dashboard.png" width="700">
+  <img src="images/Forecast Actual vs Predicted.png" width="700">
 </p>
 
 
