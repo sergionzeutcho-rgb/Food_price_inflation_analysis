@@ -12,6 +12,8 @@ This project was developed as part of a Code Institute Hackathon by:
 | **Gia** | Streamlit Dashboard, Hypothesis Testing & Project Board |
 | **Sergio** | Streamlit Dashboard, Machine Learning & Hypothesis Testing |
 
+**Streamlit Dashboard Live link**: https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/
+
 ---
 
 ## Project Overview
@@ -485,11 +487,7 @@ This project is fully compliant with the **General Data Protection Regulation (G
 
 ### Heroku Deployment
 
-1. Log in to Heroku and create an App
-2. At the **Deploy** tab, select **GitHub** as the deployment method
-3. Select your repository name and click **Connect**
-4. Select the branch you want to deploy, then click **Deploy Branch**
-5. Click **Open App** to access your application
+**Live link**: https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/
 
 ---
 
