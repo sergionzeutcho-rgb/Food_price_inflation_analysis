@@ -15,6 +15,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 import joblib
+from datetime import datetime
 from scipy.stats import kruskal, spearmanr, mannwhitneyu
 
 # Page configuration
@@ -33,6 +34,15 @@ COLOR_BLUE  = "#1f77b4"   # brand blue
 
 RISK_LOW_THRESHOLD  = 5    # inflation %
 RISK_HIGH_THRESHOLD = 10   # inflation %
+
+# ─── Reusable month-name lists (DRY) ────────────────────────────────────────
+MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+               'July', 'August', 'September', 'October', 'November', 'December']
+MONTH_ABBR  = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+# ─── Dynamic year for predictions ───────────────────────────────────────────
+_CURRENT_YEAR = datetime.now().year
 
 # ─── Custom CSS ──────────────────────────────────────────────────────────────
 st.markdown("""
@@ -129,7 +139,7 @@ st.markdown("""
         color: #1a1a2e;
         box-shadow: 0 1px 4px rgba(243,156,18,0.08);
     }
-    /* TL;DR / key-takeaway strip */
+    /* Key-takeaway strip */
     .takeaway-box {
         background: linear-gradient(135deg, #eae6f8 0%, #f3e8fa 100%);
         border: 1px solid #667eea44;
@@ -193,6 +203,7 @@ def load_model():
         return None, None, None, None
 
 
+@st.cache_data
 def create_time_series_chart(df, country=None):
     """Create interactive time series chart."""
     if country and country != "All Countries":
@@ -232,6 +243,7 @@ def create_time_series_chart(df, country=None):
     return fig
 
 
+@st.cache_data
 def create_country_comparison(df, metric='inflation'):
     """Create country comparison bar chart."""
     if metric == 'inflation':
@@ -265,15 +277,13 @@ def create_country_comparison(df, metric='inflation'):
     return fig
 
 
+@st.cache_data
 def create_seasonal_chart(df):
     """Create seasonal pattern chart."""
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
     monthly_avg = df.groupby('month')['inflation'].mean()
     
     fig = go.Figure(go.Bar(
-        x=months,
+        x=MONTH_ABBR,
         y=monthly_avg.values,
         marker_color=[COLOR_HIGH if x > monthly_avg.mean() else COLOR_BLUE for x in monthly_avg]
     ))
@@ -291,6 +301,7 @@ def create_seasonal_chart(df):
     return fig
 
 
+@st.cache_data
 def create_distribution_charts(df):
     """Create distribution analysis charts using Plotly."""
     fig = make_subplots(
@@ -335,6 +346,7 @@ def create_distribution_charts(df):
     return fig
 
 
+@st.cache_data
 def create_correlation_heatmap(df):
     """Create correlation heatmap."""
     correlation_cols = ['open', 'high', 'low', 'close', 'inflation', 'price_range']
@@ -361,6 +373,7 @@ def create_correlation_heatmap(df):
     return fig
 
 
+@st.cache_data
 def create_volatility_inflation_scatter(df):
     """Create volatility vs inflation scatter plot."""
     valid = df[['price_range', 'inflation']].dropna()
@@ -400,6 +413,7 @@ def create_volatility_inflation_scatter(df):
     return fig, corr, p_value
 
 
+@st.cache_data
 def create_country_boxplot(df):
     """Create inflation by country boxplot."""
     order = df.groupby('country')['inflation'].median().sort_values(ascending=False).index.tolist()
@@ -426,13 +440,11 @@ def create_country_boxplot(df):
     return fig
 
 
+@st.cache_data
 def create_seasonal_boxplot(df):
     """Create seasonal boxplot for hypothesis testing."""
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
     fig = go.Figure()
-    for i, month in enumerate(months, 1):
+    for i, month in enumerate(MONTH_ABBR, 1):
         month_data = df[df['month'] == i]['inflation'].dropna()
         fig.add_trace(go.Box(
             y=month_data,
@@ -452,6 +464,7 @@ def create_seasonal_boxplot(df):
     return fig
 
 
+@st.cache_data
 def create_price_trend_chart(df):
     """Create early vs recent price comparison chart."""
     years = sorted(df['year'].unique())
@@ -498,6 +511,7 @@ def create_price_trend_chart(df):
     return fig, mid, early_prices.mean(), recent_prices.mean()
 
 
+@st.cache_data
 def create_model_comparison_chart(results_df):
     """Create model comparison bar charts."""
     fig = make_subplots(rows=1, cols=2, subplot_titles=('R² Score by Model', 'Prediction Error by Model'))
@@ -529,6 +543,7 @@ def create_model_comparison_chart(results_df):
     return fig
 
 
+@st.cache_data
 def create_interactive_country_lines(df):
     """Create interactive line chart showing all countries."""
     fig = px.line(
@@ -546,7 +561,11 @@ def create_interactive_country_lines(df):
 
 
 def create_gauge_chart(prediction: float, title: str = "Predicted Inflation") -> go.Figure:
-    """Create a gauge chart showing predicted inflation and risk level."""
+    """Create a gauge chart showing predicted inflation and risk level.
+    
+    Zone labels are added as annotations so the chart is readable
+    without relying on colour alone (colour-blind accessible).
+    """
     # Colour steps: green → amber → red
     if prediction <= RISK_LOW_THRESHOLD:
         bar_color = COLOR_LOW
@@ -578,7 +597,15 @@ def create_gauge_chart(prediction: float, title: str = "Predicted Inflation") ->
             },
         },
     ))
-    fig.update_layout(height=280, margin=dict(t=60, b=10, l=30, r=30))
+    fig.update_layout(
+        height=280,
+        margin=dict(t=60, b=10, l=30, r=30),
+        annotations=[
+            dict(text="LOW", x=0.16, y=0.22, font=dict(size=10, color="#1e8449"), showarrow=False, xref="paper", yref="paper"),
+            dict(text="MED", x=0.50, y=0.01, font=dict(size=10, color="#b7950b"), showarrow=False, xref="paper", yref="paper"),
+            dict(text="HIGH", x=0.84, y=0.22, font=dict(size=10, color="#b03a2e"), showarrow=False, xref="paper", yref="paper"),
+        ]
+    )
     return fig
 
 
@@ -599,20 +626,27 @@ def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = "Overview"
     
-    # Header — hero banner
-    st.markdown("""
-    <div class="hero-banner">
-        <span class="hero-emoji">🌾</span>
-        <p class="hero-title">Food Price Inflation Analysis</p>
-        <p class="hero-subtitle">Exploring global food price trends and predicting inflation patterns</p>
-        <p class="hero-team">Florence &nbsp;&bull;&nbsp; Gia &nbsp;&bull;&nbsp; Sergio &nbsp;&nbsp;|&nbsp;&nbsp; Code Institute Hackathon</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Header: hero banner (full on Overview, compact on other pages)
+    if st.session_state.current_page == "Overview":
+        st.markdown("""
+        <div class="hero-banner">
+            <span class="hero-emoji">🌾</span>
+            <p class="hero-title">Food Price Inflation Analysis</p>
+            <p class="hero-subtitle">Exploring global food price trends and predicting inflation patterns</p>
+            <p class="hero-team">Florence &nbsp;&bull;&nbsp; Gia &nbsp;&bull;&nbsp; Sergio &nbsp;&nbsp;|&nbsp;&nbsp; Code Institute Hackathon</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="hero-banner" style="padding:0.8rem 1.2rem;">
+            <p style="font-size:1.3rem;font-weight:800;color:#fff;margin:0;">🌾 Food Price Inflation Analysis</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Navigation Bar in Header (visible on all pages)
     nav_pages = ["Overview", "Data Cleaning", "Data Analysis", "Hypothesis Testing", 
                  "ML Predictions", "Prediction Tool", "Country Explorer", "About"]
-    nav_icons = ["", "", "", "", "", "", "", ""]
+    nav_icons = ["📋", "🧹", "📊", "🧪", "🤖", "🔮", "🌍", "ℹ️"]
     
     # Create navigation buttons in columns
     nav_cols = st.columns(len(nav_pages))
@@ -622,8 +656,6 @@ def main():
                         type="primary" if st.session_state.current_page == nav_page else "secondary"):
                 st.session_state.current_page = nav_page
                 st.rerun()
-    
-    st.markdown("---")
     
     # Load data
     df = load_data()
@@ -654,24 +686,27 @@ def main():
     st.sidebar.subheader("Filters")
     
     countries = ["All Countries"] + sorted(df['country'].unique().tolist())
+    years = sorted(df['year'].unique())
+    default_country = "All Countries"
+    default_years   = (int(min(years)), int(max(years)))
+
     selected_country = st.sidebar.selectbox(
         "Select Country",
         countries,
+        key="country_filter",
         help="Filter all charts to show data for one country only"
     )
     
-    years = sorted(df['year'].unique())
     year_range = st.sidebar.slider(
         "Year Range",
         min_value=int(min(years)),
         max_value=int(max(years)),
-        value=(int(min(years)), int(max(years))),
+        value=default_years,
+        key="year_filter",
         help="Drag the handles to narrow the time window"
     )
     
     # Reset filters button
-    default_country = "All Countries"
-    default_years   = (int(min(years)), int(max(years)))
     filters_active  = (selected_country != default_country) or (year_range != default_years)
     
     if filters_active:
@@ -682,14 +717,9 @@ def main():
             st.sidebar.info(f"{year_range[0]} – {year_range[1]}")
 
     if st.sidebar.button("Reset Filters", use_container_width=True, disabled=not filters_active):
-        st.session_state["_reset_country"] = True
+        st.session_state["country_filter"] = default_country
+        st.session_state["year_filter"] = default_years
         st.rerun()
-    
-    # Handle reset (re-run with defaults)
-    if st.session_state.get("_reset_country"):
-        st.session_state.pop("_reset_country", None)
-        selected_country = default_country
-        year_range       = default_years
     
     # Filter data
     df_filtered = df[(df['year'] >= year_range[0]) & (df['year'] <= year_range[1])]
@@ -700,11 +730,11 @@ def main():
     if page == "Overview":
         st.markdown('<p class="section-header">Project Overview</p>', unsafe_allow_html=True)
         
-        # TL;DR key takeaway
+        # Key takeaway
         avg_inf_all = df['inflation'].mean()
         st.markdown(f"""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Over 16 years (2007–2023) food prices rose significantly across 
+        <strong>Key Takeaway:</strong> Over 16 years (2007–2023) food prices rose significantly across 
         25 countries. Average global inflation stood at <strong>{avg_inf_all:.1f}%</strong> per year, 
         with large regional differences. Scroll down or use a page in the navigation bar to dive deeper.
         </div>
@@ -724,14 +754,14 @@ def main():
             | 5 | Visit **Country Explorer** to download filtered data as CSV |
 
             **Page Guide**
-            - **Overview** — big-picture summary and key metrics
-            - **Data Cleaning** — how the raw dataset was prepared
-            - **Data Analysis** — distributions, correlations and seasonal patterns
-            - **Hypothesis Testing** — statistically validated findings
-            - **ML Predictions** — model training, comparison and feature importance
-            - **Prediction Tool** — interactive inflation forecaster
-            - **Country Explorer** — per-country deep-dive and data download
-            - **About** — team, methodology and data source
+            - **Overview**: big-picture summary and key metrics
+            - **Data Cleaning**: how the raw dataset was prepared
+            - **Data Analysis**: distributions, correlations and seasonal patterns
+            - **Hypothesis Testing**: statistically validated findings
+            - **ML Predictions**: model training, comparison and feature importance
+            - **Prediction Tool**: interactive inflation forecaster
+            - **Country Explorer**: per-country deep-dive and data download
+            - **About**: team, methodology and data source
             """)
         
         st.markdown("""
@@ -770,7 +800,7 @@ def main():
             )
         
         with col4:
-            if len(df_filtered) > 1:
+            if len(df_filtered) > 1 and df_filtered['close'].iloc[0] != 0:
                 price_change = ((df_filtered['close'].iloc[-1] - df_filtered['close'].iloc[0]) / 
                                df_filtered['close'].iloc[0] * 100)
                 st.metric(
@@ -856,9 +886,9 @@ def main():
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
+        <strong>Key Takeaway:</strong> The raw World Bank dataset (4,798 rows, 8 columns) was loaded,
         validated and enriched with 6 new features (volatility, price change, month, year…).
-        Missing inflation values (≈7.6%) were kept intentionally — they are structural gaps from the
+        Missing inflation values (≈7.6%) were kept intentionally because they are structural gaps from the
         year-over-year calculation, not errors.
         </div>
         """, unsafe_allow_html=True)
@@ -894,9 +924,9 @@ print(f"Countries in dataset: {df['country'].nunique()}")
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("Original Records", "4,798")
+            st.metric("Original Records", f"{len(df):,}")
         with col2:
-            st.metric("Original Columns", "8")
+            st.metric("Original Columns", f"{df.shape[1]}")
         
         st.markdown('<p class="section-header">Missing Values Analysis</p>', unsafe_allow_html=True)
         
@@ -906,7 +936,7 @@ print(f"Countries in dataset: {df['country'].nunique()}")
         Missing values can significantly impact our analysis in several ways. Statistical calculations 
         like means and standard deviations can be biased if missing values are not handled properly. 
         Many machine learning algorithms cannot process datasets containing missing values at all. 
-        Additionally, patterns in missingness themselves can provide insights—for example, if inflation 
+        Additionally, patterns in missingness themselves can provide insights. For example, if inflation 
         data is missing for certain periods, this might indicate data collection challenges during 
         those times.
         
@@ -987,15 +1017,15 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Food prices are right-skewed and have risen steadily since 2007.
+        <strong>Key Takeaway:</strong> Food prices are right-skewed and have risen steadily since 2007.
         Country-level inflation ranges from near 0% to over 20%. Price volatility and inflation are
-        positively correlated, and mild seasonal patterns exist — use the sidebar to filter by country.
+        positively correlated, and mild seasonal patterns exist. Use the sidebar to filter by country.
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         Exploratory Data Analysis (EDA) is the detective work of data science. Before we can draw 
-        conclusions or build predictive models, we need to deeply understand our data—its distributions, 
+        conclusions or build predictive models, we need to deeply understand our data, including its distributions, 
         patterns, relationships, and anomalies. This systematic exploration guides our subsequent 
         hypothesis testing and modeling decisions.
         """)
@@ -1006,7 +1036,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="explanation-box">
         <strong>Why We Analyse Distributions:</strong><br><br>
         Understanding the distribution of our variables is essential for several reasons. First, it 
-        helps us choose appropriate statistical tests—many common tests assume normally distributed 
+        helps us choose appropriate statistical tests. Many common tests assume normally distributed 
         data, so we need to verify this assumption or select non-parametric alternatives. Second, 
         distributions reveal outliers and extreme values that may require special handling or 
         investigation. Third, skewed distributions might benefit from transformation before modeling.
@@ -1073,7 +1103,7 @@ df['quarter'] = df['date'].dt.quarter
         Correlation analysis helps us understand how different variables move together. A positive 
         correlation means that when one variable increases, the other tends to increase as well. 
         A negative correlation indicates an inverse relationship. However, it is crucial to remember 
-        that correlation does not imply causation—two variables may be correlated because they share 
+        that correlation does not imply causation. Two variables may be correlated because they share 
         a common cause, or the relationship may be coincidental.
         
         Our correlation analysis revealed strong positive correlations among the price indices (Open, 
@@ -1092,16 +1122,17 @@ df['quarter'] = df['date'].dt.quarter
         Values near 0 suggest little to no linear relationship between the variables.
         """)
         
-        fig_corr = create_correlation_heatmap(df_filtered)
-        st.plotly_chart(fig_corr, use_container_width=True)
+        with st.spinner("Building correlation heatmap..."):
+            fig_corr = create_correlation_heatmap(df_filtered)
+            st.plotly_chart(fig_corr, use_container_width=True)
         
         st.markdown("""
         <div class="recommendation-box">
         <strong>What does this mean for you?</strong><br>
         The strong link between price <em>volatility</em> (High−Low range) and <em>inflation</em> is the
         key practical finding here. It means that when prices swing wildly within a single month,
-        overall price levels tend to be rising too. Smoothing-out those swings — through better
-        market information, storage infrastructure, or price floors/ceilings — could also help
+        overall price levels tend to be rising too. Smoothing-out those swings (through better
+        market information, storage infrastructure, or price floors/ceilings) could also help
         moderate inflation.
         </div>
         """, unsafe_allow_html=True)
@@ -1142,8 +1173,9 @@ df['quarter'] = df['date'].dt.quarter
         countries with similar or divergent patterns.
         """)
         
-        fig_countries = create_interactive_country_lines(df_filtered)
-        st.plotly_chart(fig_countries, use_container_width=True)
+        with st.spinner("Rendering country trends..."):
+            fig_countries = create_interactive_country_lines(df_filtered)
+            st.plotly_chart(fig_countries, use_container_width=True)
         
         st.markdown("""
         <div class="outcome-box">
@@ -1160,7 +1192,7 @@ df['quarter'] = df['date'].dt.quarter
         local policy choices and economic conditions significantly influence food price outcomes.
         
         The correlation between price volatility and inflation suggests that stabilising prices 
-        could help control inflation. This finding has important policy implications—interventions 
+        could help control inflation. This finding has important policy implications. Interventions 
         that reduce price volatility, such as strategic reserves, price supports, or improved 
         market information systems, might also help control inflation.
         </div>
@@ -1172,9 +1204,11 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Two hypotheses were <strong>statistically significant</strong>:
-        (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation.
-        Two hypotheses were <strong>not significant</strong>: (H3) seasonal patterns; (H4) long-term price increase.
+        <strong>Key Takeaway:</strong> Three hypotheses were <strong>statistically significant</strong>:
+        (H1) inflation differs significantly by country; (H2) price volatility correlates with higher inflation;
+        (H4) food prices have significantly increased over time.
+        (H3) Seasonal patterns <strong>vary by analysis</strong>.
+        (H5) ML models <strong>partially support</strong> short-term inflation forecasting.
         Significance level: α = 0.05.
         </div>
         """, unsafe_allow_html=True)
@@ -1193,7 +1227,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="explanation-box">
         <strong>What P-Values Tell Us:</strong><br><br>
         The p-value is the probability of observing results as extreme as ours if the null hypothesis 
-        were true—that is, if there were no real effect or difference. A small p-value (typically 
+        were true, that is, if there were no real effect or difference. A small p-value (typically 
         less than 0.05) suggests that our results are unlikely to have occurred by chance alone, 
         providing evidence against the null hypothesis.
         
@@ -1236,7 +1270,7 @@ df['quarter'] = df['date'].dt.quarter
             
             The Kruskal-Wallis test confirmed that inflation rates differ significantly across countries. 
             This means the substantial variation we observed during exploratory analysis is not due to 
-            random chance—there are real, systematic differences in how different countries experience 
+            random chance. There are real, systematic differences in how different countries experience 
             food price inflation.
             
             <strong>Practical Implication:</strong> Global solutions to food price inflation may not be 
@@ -1261,7 +1295,7 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Why We Used Spearman Correlation:</strong><br><br>
         We chose Spearman's rank correlation coefficient over Pearson's correlation because it does 
         not require the relationship between variables to be linear or the data to be normally 
-        distributed. Spearman's method measures monotonic relationships—whether one variable tends 
+        distributed. Spearman's method measures monotonic relationships, specifically whether one variable tends 
         to increase as the other increases, regardless of whether that relationship follows a 
         straight line.
         
@@ -1281,8 +1315,8 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Result: {h2_result} {direction.upper()} CORRELATION (r = {h2_corr:.4f}, p = {h2_p:.2e})</strong><br><br>
         
         Our analysis found a statistically significant {direction} relationship between price volatility 
-        and inflation rates. This means that periods and countries with more volatile prices—larger 
-        swings between high and low values—tend to also experience higher inflation.
+        and inflation rates. This means that periods and countries with more volatile prices (larger 
+        swings between high and low values) tend to also experience higher inflation.
         
         <strong>Practical Implication:</strong> Price stabilisation policies could have a dual benefit. 
         By reducing the gap between high and low prices, interventions might also help control 
@@ -1319,20 +1353,32 @@ df['quarter'] = df['date'].dt.quarter
             h3_stat, h3_p = kruskal(*month_groups)
             h3_result = 'SIGNIFICANT' if h3_p < 0.05 else 'NOT SIGNIFICANT'
             
-            st.markdown(f"""
-            <div class="outcome-box">
-            <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
-            
-            Our analysis provides evidence for seasonal patterns in food price inflation. Certain months 
-            consistently show higher average inflation rates than others, suggesting that agricultural 
-            production cycles and seasonal demand fluctuations do influence price dynamics.
-            
-            <strong>Practical Implication:</strong> Understanding these patterns enables better planning. 
-            Consumers might time major food purchases to avoid high-inflation periods. Food assistance 
-            programs might increase support during months when prices typically spike. Agricultural 
-            planners might work to smooth out production cycles to reduce seasonal price volatility.
-            </div>
-            """, unsafe_allow_html=True)
+            if h3_p < 0.05:
+                st.markdown(f"""
+                <div class="outcome-box">
+                <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
+                Our analysis provides evidence for seasonal patterns in food price inflation. Certain months
+                consistently show higher average inflation rates than others, suggesting that agricultural
+                production cycles and seasonal demand fluctuations do influence price dynamics.
+                <br><br>
+                <strong>Practical Implication:</strong> Understanding these patterns enables better planning.
+                Consumers might time major food purchases to avoid high-inflation periods. Food assistance
+                programs might increase support during months when prices typically spike.
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="outcome-box">
+                <strong>Result: {h3_result} (p = {h3_p:.2e})</strong><br><br>
+                At the global level, no statistically significant seasonal pattern was detected. Monthly
+                inflation distributions are broadly similar, meaning there is no single month that
+                consistently drives higher or lower inflation across all countries.
+                <br><br>
+                <strong>Practical Implication:</strong> While global seasonality is weak, individual
+                countries may still exhibit local seasonal effects driven by their own agricultural
+                calendars. Country-level analysis is recommended before drawing planning conclusions.
+                </div>
+                """, unsafe_allow_html=True)
             
             # H3 Chart
             fig_h3 = create_seasonal_boxplot(df_filtered)
@@ -1346,8 +1392,8 @@ df['quarter'] = df['date'].dt.quarter
         <strong>Research Question:</strong> Have food prices significantly increased over time?<br><br>
         
         <strong>Why We Used the Mann-Whitney U Test:</strong><br><br>
-        To test for a long-term trend, we divided the dataset into two periods—the first half and 
-        the second half of the time series—and compared price distributions between them. The 
+        To test for a long-term trend, we divided the dataset into two periods (the first half and 
+        the second half of the time series) and compared price distributions between them. The 
         Mann-Whitney U test is ideal for comparing two independent groups when the data may not 
         be normally distributed.
         
@@ -1360,8 +1406,8 @@ df['quarter'] = df['date'].dt.quarter
         # Run H4 test and create chart
         fig_h4, mid_year, early_avg, recent_avg = create_price_trend_chart(df_filtered)
         years = sorted(df_filtered['year'].unique())
-        early = df_filtered[df_filtered['year'] < mid_year]['close']
-        recent = df_filtered[df_filtered['year'] >= mid_year]['close']
+        early = df_filtered[df_filtered['year'] < mid_year]['close'].dropna()
+        recent = df_filtered[df_filtered['year'] >= mid_year]['close'].dropna()
         
         if len(early) > 0 and len(recent) > 0:
             h4_stat, h4_p = mannwhitneyu(early, recent)
@@ -1450,10 +1496,10 @@ df['quarter'] = df['date'].dt.quarter
         benefit of moderating inflation. Consider investments in strategic food reserves, improved 
         market information systems, and mechanisms to smooth out supply disruptions.
         
-        <strong>Account for Seasonality in Planning:</strong> Since inflation shows seasonal patterns, 
-        timing matters for interventions. Food assistance programs might be most needed during 
-        high-inflation months, while procurement and storage programs might be most effective during 
-        low-price periods.
+        <strong>Consider Local Seasonality in Planning:</strong> Although global seasonal patterns 
+        were not statistically significant, individual countries may exhibit local seasonal effects. 
+        Country-level analysis is recommended before timing food assistance or procurement programs 
+        around specific months.
         
         <strong>Address Long-term Affordability:</strong> The significant upward trend in food prices 
         demands attention to long-term affordability. Investments in agricultural productivity, 
@@ -1468,7 +1514,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Three models were trained: Linear Regression, Random Forest, and
+        <strong>Key Takeaway:</strong> Three models were trained: Linear Regression, Random Forest, and
         XGBoost. The best model explains the majority of inflation variance (R² on test data). The
         strongest predictor is <em>last month’s inflation</em>. Head to
         <strong>🔮 Prediction Tool</strong> to run live forecasts.
@@ -1509,7 +1555,7 @@ df['quarter'] = df['date'].dt.quarter
         To predict future inflation, we engineered several types of features from our historical data:
         
         <strong>Lag Features:</strong> We included previous months' inflation and price values as 
-        features. Inflation often shows persistence—high inflation this month tends to be followed 
+        features. Inflation often shows persistence: high inflation this month tends to be followed 
         by high inflation next month. By including lag values for 1, 3, 6, and 12 months, the model 
         can learn these temporal dependencies.
         
@@ -1590,7 +1636,7 @@ df['quarter'] = df['date'].dt.quarter
                 
                 <strong>Key Finding:</strong> The most important predictor of inflation is the previous 
                 month's inflation value, followed by other lag features. This strong autoregressive 
-                pattern makes intuitive sense—inflation tends to persist, and knowing recent inflation 
+                pattern makes intuitive sense: inflation tends to persist, and knowing recent inflation 
                 gives us substantial information about future inflation.
                 </div>
                 """, unsafe_allow_html=True)
@@ -1606,12 +1652,30 @@ df['quarter'] = df['date'].dt.quarter
             the model is learning sensible patterns and provides insights into the drivers of inflation.
             """)
             
-            try:
-                from PIL import Image
-                img = Image.open('outputs/figures/feature_importance.png')
-                st.image(img, use_container_width=True)
-            except FileNotFoundError:
-                st.info("Feature importance chart not available.")
+            # Try interactive chart from model object first, fall back to static PNG
+            if hasattr(model, 'feature_importances_') and feature_cols is not None:
+                importances = model.feature_importances_
+                feat_names = list(feature_cols) if not isinstance(feature_cols, list) else feature_cols
+                fi_df = pd.DataFrame({'Feature': feat_names, 'Importance': importances})
+                fi_df = fi_df.sort_values('Importance', ascending=True)
+                
+                fig_fi = go.Figure(go.Bar(
+                    x=fi_df['Importance'], y=fi_df['Feature'],
+                    orientation='h', marker_color=COLOR_BLUE
+                ))
+                fig_fi.update_layout(
+                    title="Feature Importance (from best model)",
+                    xaxis_title="Importance", yaxis_title="Feature",
+                    height=max(350, len(feat_names) * 28)
+                )
+                st.plotly_chart(fig_fi, use_container_width=True)
+            else:
+                try:
+                    from PIL import Image
+                    img = Image.open('outputs/figures/feature_importance.png')
+                    st.image(img, use_container_width=True)
+                except FileNotFoundError:
+                    st.info("Feature importance chart not available.")
         
         st.markdown('<p class="section-header">Model Limitations</p>', unsafe_allow_html=True)
         
@@ -1627,8 +1691,8 @@ df['quarter'] = df['date'].dt.quarter
         alter inflation dynamics in ways not captured by historical patterns.
         
         <strong>Structural Changes:</strong> The models assume that relationships between variables 
-        remain stable over time. If fundamental economic structures change—for example, due to 
-        major trade policy shifts or technological disruptions—historical patterns may no longer apply.
+        remain stable over time. If fundamental economic structures change (for example, due to 
+        major trade policy shifts or technological disruptions), historical patterns may no longer apply.
         
         <strong>Data Quality:</strong> Predictions are only as good as the input data. If there are 
         errors or gaps in the underlying data, these will propagate through to the predictions.
@@ -1645,7 +1709,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Choose <strong>Quick Prediction</strong> to forecast any country
+        <strong>Key Takeaway:</strong> Choose <strong>Quick Prediction</strong> to forecast any country
         with one click (data auto-filled from history), or <strong>Custom Prediction</strong> to tweak
         every input for scenario analysis. Results include a risk gauge, key metrics, and a 24-month
         historical chart with your forecast plotted.
@@ -1679,8 +1743,6 @@ df['quarter'] = df['date'].dt.quarter
                 help="Quick mode uses historical averages, Custom mode allows manual input"
             )
             
-            st.markdown("---")
-            
             if prediction_mode == "Quick Prediction":
                 st.markdown('<p class="section-header">Quick Prediction</p>', unsafe_allow_html=True)
                 
@@ -1706,7 +1768,7 @@ df['quarter'] = df['date'].dt.quarter
                 with quick_col2:
                     quick_year = st.selectbox(
                         "Target Year",
-                        options=[2024, 2025, 2026, 2027, 2028],
+                        options=list(range(_CURRENT_YEAR, _CURRENT_YEAR + 5)),
                         key="quick_year"
                     )
                 
@@ -1714,8 +1776,7 @@ df['quarter'] = df['date'].dt.quarter
                     quick_month = st.selectbox(
                         "Target Month",
                         options=list(range(1, 13)),
-                        format_func=lambda x: ['January', 'February', 'March', 'April', 'May', 'June', 
-                                              'July', 'August', 'September', 'October', 'November', 'December'][x-1],
+                        format_func=lambda x: MONTH_NAMES[x-1],
                         key="quick_month"
                     )
                 
@@ -1770,7 +1831,7 @@ df['quarter'] = df['date'].dt.quarter
                                 if encoder is not None:
                                     try:
                                         input_features['country_encoded'] = encoder.transform([quick_country])[0]
-                                    except:
+                                    except (ValueError, KeyError):
                                         input_features['country_encoded'] = 0
                                 
                                 # Create dataframe
@@ -1792,7 +1853,6 @@ df['quarter'] = df['date'].dt.quarter
                                 prediction = model.predict(input_scaled)[0]
                                 
                                 # Display results
-                                st.markdown("---")
                                 st.markdown('<p class="section-header">Prediction Results</p>', unsafe_allow_html=True)
                                 
                                 last_inf = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
@@ -1844,8 +1904,7 @@ df['quarter'] = df['date'].dt.quarter
                                         )
                                 
                                 # Interpretation box
-                                month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                             'July', 'August', 'September', 'October', 'November', 'December'][quick_month-1]
+                                month_name = MONTH_NAMES[quick_month-1]
                                 
                                 if prediction > RISK_HIGH_THRESHOLD:
                                     interpretation = f"🚨 **HIGH INFLATION ALERT**: The model predicts significant inflation of **{prediction:.2f}%** for {quick_country} in {month_name} {quick_year}. This could severely impact food affordability and requires immediate attention from policymakers."
@@ -1896,7 +1955,7 @@ df['quarter'] = df['date'].dt.quarter
                                     ))
                                     
                                     fig.update_layout(
-                                        title=f"Inflation Trend – {quick_country} (last 24 months + forecast)",
+                                        title=f"Inflation Trend: {quick_country} (last 24 months + forecast)",
                                         xaxis_title="Date",
                                         yaxis_title="Inflation (%)",
                                         height=420,
@@ -1905,6 +1964,93 @@ df['quarter'] = df['date'].dt.quarter
                                     )
                                     
                                     st.plotly_chart(fig, use_container_width=True)
+                                
+                                # --- Multi-step rolling forecast ---
+                                st.markdown('<p class="section-header">Multi-Step Forecast</p>', unsafe_allow_html=True)
+                                horizon = st.slider("Forecast horizon (months)", 1, 12, 6, key="forecast_horizon")
+                                
+                                if st.button("Run Rolling Forecast", key="btn_rolling"):
+                                    with st.spinner("Running multi-step forecast..."):
+                                        rolling_results = []
+                                        # seed values from latest history
+                                        seed_inf   = float(latest['inflation']) if pd.notna(latest['inflation']) else avg_inflation
+                                        seed_close = float(latest['close'])
+                                        seed_range = float(country_data['price_range'].mean())
+                                        recent_inf = list(country_data['inflation'].dropna().tail(12))
+                                        recent_prices = list(country_data['close'].tail(12))
+                                        
+                                        for step in range(horizon):
+                                            m = ((quick_month - 1 + step) % 12) + 1
+                                            y = quick_year + (quick_month - 1 + step) // 12
+                                            q = (m - 1) // 3 + 1
+                                            
+                                            step_features = {
+                                                'year': y, 'month': m, 'quarter': q,
+                                                'close': seed_close,
+                                                'price_range': seed_range,
+                                                'inflation_lag_1': recent_inf[-1] if recent_inf else seed_inf,
+                                                'inflation_lag_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
+                                                'inflation_lag_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
+                                                'inflation_lag_12': float(np.mean(recent_inf[-12:])) if len(recent_inf) >= 12 else seed_inf,
+                                                'price_lag_1': recent_prices[-1] if recent_prices else seed_close,
+                                                'price_ma_3': float(np.mean(recent_prices[-3:])) if len(recent_prices) >= 3 else seed_close,
+                                                'price_ma_6': float(np.mean(recent_prices[-6:])) if len(recent_prices) >= 6 else seed_close,
+                                                'price_ma_12': float(np.mean(recent_prices[-12:])) if len(recent_prices) >= 12 else seed_close,
+                                                'inflation_ma_3': float(np.mean(recent_inf[-3:])) if len(recent_inf) >= 3 else seed_inf,
+                                                'inflation_ma_6': float(np.mean(recent_inf[-6:])) if len(recent_inf) >= 6 else seed_inf,
+                                            }
+                                            if encoder is not None:
+                                                try:
+                                                    step_features['country_encoded'] = encoder.transform([quick_country])[0]
+                                                except (ValueError, KeyError):
+                                                    step_features['country_encoded'] = 0
+                                            
+                                            step_df = pd.DataFrame([step_features])
+                                            if feature_cols is not None:
+                                                for col in feature_cols:
+                                                    if col not in step_df.columns:
+                                                        step_df[col] = 0
+                                                step_df = step_df[feature_cols]
+                                            
+                                            step_scaled = scaler.transform(step_df) if scaler else step_df.values
+                                            step_pred = float(model.predict(step_scaled)[0])
+                                            
+                                            rolling_results.append({
+                                                "Date": pd.Timestamp(year=y, month=m, day=1),
+                                                "Month": MONTH_NAMES[m - 1],
+                                                "Year": y,
+                                                "Predicted Inflation (%)": round(step_pred, 2)
+                                            })
+                                            # feed prediction back
+                                            recent_inf.append(step_pred)
+                                            recent_prices.append(seed_close)  # price stays approx constant
+                                        
+                                        roll_df = pd.DataFrame(rolling_results)
+                                        st.dataframe(roll_df, use_container_width=True)
+                                        
+                                        # Rolling forecast chart
+                                        fig_roll = go.Figure()
+                                        fig_roll.add_trace(go.Scatter(
+                                            x=roll_df["Date"], y=roll_df["Predicted Inflation (%)"],
+                                            mode='lines+markers', name='Forecast',
+                                            line=dict(color=COLOR_HIGH, width=2, dash='dot'),
+                                            marker=dict(size=8, symbol='star')
+                                        ))
+                                        fig_roll.add_hline(y=hist_avg, line_dash="dash", line_color=COLOR_MED,
+                                                           annotation_text=f"Avg: {hist_avg:.1f}%")
+                                        fig_roll.update_layout(
+                                            title=f"{horizon}-Month Rolling Forecast: {quick_country}",
+                                            xaxis_title="Date", yaxis_title="Inflation (%)", height=380
+                                        )
+                                        st.plotly_chart(fig_roll, use_container_width=True)
+                                        
+                                        # Download button for rolling forecast
+                                        csv_roll = roll_df.to_csv(index=False)
+                                        st.download_button(
+                                            "Download Forecast (CSV)", csv_roll,
+                                            file_name=f"forecast_{quick_country.replace(' ', '_').lower()}_{horizon}m.csv",
+                                            mime="text/csv"
+                                        )
                                 
                             except Exception as e:
                                 st.error(f"❌ Error making prediction: {str(e)}")
@@ -1944,8 +2090,7 @@ df['quarter'] = df['date'].dt.quarter
                     custom_month = st.selectbox(
                         "Month",
                         options=list(range(1, 13)),
-                        format_func=lambda x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x-1],
+                        format_func=lambda x: MONTH_ABBR[x-1],
                         key="custom_month"
                     )
                     
@@ -2056,6 +2201,16 @@ df['quarter'] = df['date'].dt.quarter
                             format="%.2f",
                             key="custom_inf_ma3"
                         )
+                        
+                        custom_inf_ma6 = st.number_input(
+                            "6-Month Inflation Moving Average (%)",
+                            min_value=-50.0,
+                            max_value=100.0,
+                            value=float(df['inflation'].median()),
+                            format="%.2f",
+                            key="custom_inf_ma6",
+                            help="Rolling 6-month mean of inflation (distinct from the lag-6 value above)"
+                        )
                 
                 # Prediction button
                 if st.button("Generate Prediction", type="primary", use_container_width=True):
@@ -2076,13 +2231,13 @@ df['quarter'] = df['date'].dt.quarter
                                 'price_ma_6': st.session_state.get("custom_price_ma6", custom_close),
                                 'price_ma_12': st.session_state.get("custom_price_ma12", custom_close),
                                 'inflation_ma_3': st.session_state.get("custom_inf_ma3", custom_lag3),
-                                'inflation_ma_6': custom_lag6,
+                                'inflation_ma_6': st.session_state.get("custom_inf_ma6", custom_lag6),
                             }
                             
                             if encoder is not None:
                                 try:
                                     input_features['country_encoded'] = encoder.transform([custom_country])[0]
-                                except:
+                                except (ValueError, KeyError):
                                     input_features['country_encoded'] = 0
                             
                             input_df = pd.DataFrame([input_features])
@@ -2101,7 +2256,6 @@ df['quarter'] = df['date'].dt.quarter
                             prediction = model.predict(input_scaled)[0]
                             
                             # Display results
-                            st.markdown("---")
                             st.markdown('<p class="section-header">Custom Prediction Results</p>', unsafe_allow_html=True)
                             
                             risk_label, risk_class = get_risk_label(prediction)
@@ -2140,8 +2294,7 @@ df['quarter'] = df['date'].dt.quarter
                                     )
                             
                             # Detailed interpretation box
-                            month_name = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                         'July', 'August', 'September', 'October', 'November', 'December'][custom_month-1]
+                            month_name = MONTH_NAMES[custom_month-1]
                             
                             direction = "increase" if prediction > custom_lag1 else "decrease"
                             change_pp  = abs(prediction - custom_lag1)
@@ -2158,9 +2311,9 @@ df['quarter'] = df['date'].dt.quarter
                             
                             st.markdown(f"""
                             <div class="outcome-box">
-                            <strong>{alert} — {custom_country}, {month_name} {custom_year}</strong><br><br>
-                            Predicted inflation: <strong>{prediction:.2f}%</strong> — 
-                            a {change_pp:.2f} pp {direction} vs the previous month ({custom_lag1:.2f}%). {advice}
+                            <strong>{alert}: {custom_country}, {month_name} {custom_year}</strong><br><br>
+                            Predicted inflation: <strong>{prediction:.2f}%</strong>.
+                            A {change_pp:.2f} pp {direction} vs the previous month ({custom_lag1:.2f}%). {advice}
                             <br><br>
                             <strong>Input Summary:</strong> Price Index {custom_close:.2f} · 
                             Volatility {custom_range:.4f} · Previous Inflation {custom_lag1:.2f}% · 
@@ -2168,12 +2321,25 @@ df['quarter'] = df['date'].dt.quarter
                             </div>
                             """, unsafe_allow_html=True)
                             
+                            # Download custom prediction
+                            custom_result = pd.DataFrame([{
+                                "Country": custom_country, "Year": custom_year,
+                                "Month": month_name, "Predicted Inflation (%)": round(prediction, 2),
+                                "Risk": risk_label, "Price Index": custom_close,
+                                "Volatility": custom_range, "Prev Inflation": custom_lag1
+                            }])
+                            st.download_button(
+                                "Download Prediction (CSV)",
+                                custom_result.to_csv(index=False),
+                                file_name=f"custom_pred_{custom_country.replace(' ', '_').lower()}_{custom_year}_{custom_month}.csv",
+                                mime="text/csv"
+                            )
+                            
                         except Exception as e:
                             st.error(f"❌ Error making prediction: {str(e)}")
                             st.info("Please check your input values and try again.")
             
             # Disclaimer
-            st.markdown("---")
             st.markdown("""
             <div class="recommendation-box">
             <strong>⚠️ Important Disclaimer</strong><br><br>
@@ -2191,7 +2357,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — Compare all countries side-by-side or drill into one using the
+        <strong>Key Takeaway:</strong> Compare all countries side-by-side or drill into one using the
         sidebar filter. The table below ranks every country by average inflation. Use the
         <strong>Download</strong> buttons to export the data you’re viewing.
         </div>
@@ -2228,7 +2394,7 @@ df['quarter'] = df['date'].dt.quarter
         <div class="recommendation-box">
         <strong>What does this mean for you?</strong><br>
         Countries with <em>high average inflation and high standard deviation</em> are the most
-        unpredictable markets — prices can swing sharply. Buyers sourcing from those countries should
+        unpredictable markets, as prices can swing sharply. Buyers sourcing from those countries should
         build in cost buffers or use fixed-price contracts. Countries with <em>low Infl Std</em> offer
         more stable purchasing conditions even if the average inflation is moderate.
         </div>
@@ -2273,7 +2439,7 @@ df['quarter'] = df['date'].dt.quarter
         
         st.markdown("""
         <div class="takeaway-box">
-        <strong>TL;DR</strong> — This dashboard was built by a three-person team for the Code 
+        <strong>Key Takeaway:</strong> This dashboard was built by a three-person team for the Code 
         Institute Data Analytics Hackathon. It analyses global food price inflation across 25 countries 
         (2007–2023) using statistical testing and machine learning to forecast future inflation trends.
         </div>
@@ -2286,7 +2452,7 @@ df['quarter'] = df['date'].dt.quarter
         
         The World Bank's Real-Time Food Prices dataset provided rich historical data spanning 16 years 
         and 25 countries, enabling us to examine both temporal trends and geographic variations in food 
-        price dynamics. Our analysis pipeline—implemented across four Jupyter notebooks—follows industry 
+        price dynamics. Our analysis pipeline, implemented across four Jupyter notebooks, follows industry 
         best practices for reproducible data science.
         """)
         
@@ -2306,19 +2472,23 @@ df['quarter'] = df['date'].dt.quarter
         with col2:
             st.markdown("""
             **Gia**
-            *Streamlit Dashboard & Project Board*
+            *Streamlit Dashboard, Hypothesis Testing & Project Board*
 
-            Managed the project board and contributed to the interactive Streamlit dashboard development.
-            Ensured project coordination and delivery.
+            Managed the project board and contributed to the
+            interactive Streamlit dashboard development. Supported
+            hypothesis testing and ensured project coordination
+            and delivery.
             """)
 
         with col3:
             st.markdown("""
             **Sergio**
-            *Streamlit Dashboard & Machine Learning*
+            *Streamlit Dashboard, Machine Learning & Hypothesis Testing*
 
-            Led the development of machine learning models and the interactive Streamlit dashboard.
-            Responsible for feature engineering and model evaluation.
+            Led the development of machine learning models and
+            the interactive Streamlit dashboard. Responsible for
+            feature engineering, model evaluation, and hypothesis
+            testing.
             """)
         
         st.markdown('<p class="section-header">Methodology Summary</p>', unsafe_allow_html=True)
@@ -2327,7 +2497,7 @@ df['quarter'] = df['date'].dt.quarter
         Our analysis followed the CRISP-DM (Cross-Industry Standard Process for Data Mining) methodology:
         
         **Business Understanding:** We identified the key questions about food price inflation that 
-        stakeholders need answered—how prices have changed, why they vary across regions, whether 
+        stakeholders need answered: how prices have changed, why they vary across regions, whether 
         patterns are predictable, and what drives inflation.
         
         **Data Understanding:** We explored the World Bank RTFP dataset, examining its structure, 
@@ -2370,7 +2540,6 @@ df['quarter'] = df['date'].dt.quarter
         except FileNotFoundError:
             st.info("Run the Hypothesis_Testing notebook to see detailed results here.")
         
-        st.markdown("---")
         st.markdown("""
         <p style="text-align: center; color: gray;">
         <small>Code Institute Data Analytics Hackathon | March 2026<br>
@@ -2379,7 +2548,6 @@ df['quarter'] = df['date'].dt.quarter
         """, unsafe_allow_html=True)
     
     # Footer
-    st.sidebar.markdown("---")
     st.sidebar.markdown("""
     <small>
     Data: World Bank RTFP<br>
