@@ -8,7 +8,7 @@ This project was developed as part of a Code Institute Hackathon by:
 
 | Name | Role |
 |------|------|
-| **Funmi** | Hypothesis Testing, Documentation & Power BI |
+| **Florence** | Hypothesis Testing, Documentation & Power BI |
 | **Gia** | Streamlit Dashboard, Hypothesis Testing & Project Board |
 | **Sergio** | Streamlit Dashboard, Machine Learning & Hypothesis Testing |
 
@@ -503,7 +503,7 @@ This project is fully compliant with the **General Data Protection Regulation (G
 * Special thanks to our mentors for guidance and feedback throughout the project development.
 * Thanks to the World Bank for making the Real-Time Food Prices dataset publicly available for research and educational purposes.
 * Thanks to the open-source community for developing and maintaining the excellent Python libraries used in this project (Pandas, NumPy, Scikit-learn, Plotly, Streamlit, and more).
-* Thanks to the hackathon team members (Funmi, Gia, and Sergio) for their collaboration and dedication throughout the project.
+* Thanks to the hackathon team members (Florence, Gia, and Sergio) for their collaboration and dedication throughout the project.
 
 ---
 
