@@ -14,6 +14,8 @@ This project was developed as part of a Code Institute Hackathon by:
 
 **Streamlit Dashboard Live link**: [Live App](https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/)
 
+**Power BI Dasboard Live link**: [Power BI Link](https://app.powerbi.com/groups/me/reports/891a4da5-dcf0-4de5-98ec-5659a0854c47/cfe237a79690ad3488a2?experience=power-bi)
+
 ---
 
 ## Project Overview
@@ -277,7 +279,7 @@ An interactive Python-powered web app with 8 pages, deployed via Heroku.
 **Key features:** sidebar filters (country, year), Key Takeaway insight boxes, "What does this mean?" interpretation panels, risk badges (Low / Medium / High), and 24-month historical charts with forecast overlay.
 
 ### 📊 Power BI Dashboard (`Power Bi/Food Price Inflation Analysis.pbix`)
-A standalone interactive report built in Power BI Desktop, designed for business stakeholders.https://app.powerbi.com/groups/me/reports/891a4da5-dcf0-4de5-98ec-5659a0854c47/cfe237a79690ad3488a2?experience=power-bi
+A standalone interactive report built in Power BI Desktop, designed for business stakeholders.[Power BI Link](https://app.powerbi.com/groups/me/reports/891a4da5-dcf0-4de5-98ec-5659a0854c47/cfe237a79690ad3488a2?experience=power-bi)
 
 - Country and year slicers for cross-filtering
 - Inflation trend line charts by region
