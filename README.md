@@ -12,7 +12,7 @@ This project was developed as part of a Code Institute Hackathon by:
 | **Gia** | Streamlit Dashboard, Hypothesis Testing & Project Board |
 | **Sergio** | Streamlit Dashboard, Machine Learning & Hypothesis Testing |
 
-**Streamlit Dashboard Live link**: https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/
+**Streamlit Dashboard Live link**: [Live App](https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/)
 
 ---
 
@@ -477,24 +477,55 @@ This project is fully compliant with the **General Data Protection Regulation (G
 
 ---
 
-## Credits & References
+## Credits
 
-### Data Sources
-- [World Bank - Real-Time Food Prices](https://www.worldbank.org/en/programs/food-prices-for-nutrition)
+* **Dataset:** This project uses the World Bank Real-Time Food Prices (RTFP) dataset from the [World Bank Food Prices for Nutrition](https://www.worldbank.org/en/programs/food-prices-for-nutrition) program. The dataset provides monthly food price indicators including Open, High, Low, Close prices and inflation rates for 25 countries spanning over 16 years (2007-2023).
 
-### Code Attribution
-- Code Institute template and guidance
-- AI-assisted development (documented in notebooks)
+* **Code Institute:** Project structure and methodology guidance from the Code Institute Data Analytics program. The project follows the assessment criteria and best practices taught in the capstone project module.
 
-### Acknowledgements
-- Code Institute for the project template
-- World Bank for the open data
+* **Streamlit Documentation:** Used Streamlit's official documentation and examples for building the interactive 8-page dashboard with dynamic visualisations and user-friendly filters.
+
+* **Scikit-learn Documentation:** Referenced for implementing machine learning models, evaluation metrics, and best practices for train-test splitting, preprocessing pipelines, and model validation.
+
+* **XGBoost Documentation:** Used for implementing the Gradient Boosting regression model that achieved the best performance in inflation prediction.
+
+* **Plotly Documentation:** Used for creating interactive visualisations with professional styling, hover tooltips, and responsive charts throughout the Streamlit dashboard.
+
+* **SciPy Documentation:** Referenced for statistical hypothesis testing including Kruskal-Wallis, Mann-Whitney U, and Spearman correlation tests.
+
+* **Power BI Documentation:** Used for creating the business-focused interactive dashboard with slicers, KPI cards, and cross-filtering capabilities.
+
+* **GitHub Copilot:** AI assistance was used for code suggestions, documentation improvements, and debugging during development. All AI-generated code was reviewed, tested, and validated by the team.
+
+## Acknowledgements
+
+* I would like to thank Code Institute for providing the educational framework and assessment structure for this hackathon project.
+* Special thanks to our mentors for guidance and feedback throughout the project development.
+* Thanks to the World Bank for making the Real-Time Food Prices dataset publicly available for research and educational purposes.
+* Thanks to the open-source community for developing and maintaining the excellent Python libraries used in this project (Pandas, NumPy, Scikit-learn, Plotly, Streamlit, and more).
+* Thanks to the hackathon team members (Funmi, Gia, and Sergio) for their collaboration and dedication throughout the project.
 
 ---
 
 ## Deployment
 
+### Streamlit Dashboard
+
+The interactive web dashboard was built using **Streamlit**, a Python framework that transforms data scripts into shareable web applications. Streamlit was chosen for its simplicity, native Python integration, and ability to create professional data apps without requiring front-end development expertise.
+
+**Key advantages of using Streamlit:**
+- **Rapid prototyping:** Changes to the Python code are instantly reflected in the dashboard
+- **Native Plotly support:** Interactive charts render seamlessly with hover tooltips and zoom functionality
+- **Built-in widgets:** Sidebar filters, selectboxes, and sliders enable user interactivity without custom JavaScript
+- **Session state management:** Allows data persistence across page navigation and user interactions
+- **Multi-page architecture:** The app is organised into 8 logical pages for improved user experience
+
 ### Heroku Deployment
+
+The Streamlit app is deployed on **Heroku**, a cloud platform that supports Python applications. The deployment uses:
+- `Procfile`: Specifies the command to run the Streamlit server
+- `setup.sh`: Configures Streamlit server settings for Heroku
+- `requirements.txt`: Lists all Python dependencies for automatic installation
 
 **Live link**: https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/
 
@@ -505,7 +536,7 @@ This project is fully compliant with the **General Data Protection Regulation (G
 ### 🖥️ Streamlit Web App
 Run locally or access the deployed version:
 - **Local**: `streamlit run app.py` (after setup steps above)
-- **Deployed**: [Link to deployed app on Heroku]
+- **Deployed**: https://food-prices-inflation-a5cfe8052e3a.herokuapp.com/
 
 ### 📊 Power BI Report
 Open the `.pbix` file in Power BI Desktop to explore the interactive business dashboard:
